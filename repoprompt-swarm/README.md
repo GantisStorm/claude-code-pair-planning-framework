@@ -43,41 +43,40 @@ Takes a chat_id and spawns plan-coders in parallel to implement all files. Coder
 ## Architecture Diagram
 
 ```
-/plan command                          /code command
-     |                                      |
-     v                                      v
-+==============+                    +================+
-| Parse Input  |                    | Fetch Plan     |
-| task:        |                    | from RepoPrompt|
-| research:    |                    | (chat_id)      |
-+======+======+                    +========+=======+
-       |                                    |
-       v                                    v
-+------+------+                    +--------+--------+
-|             |                    | Parse file lists|
-v             v                    +--------+--------+
-+----------+ +----------+                   |
-|code-scout| |doc-scout |                   v
-+----+-----+ +----+-----+          +--------+--------+
-     |            |                |                 |
-     |            |                v                 v
-     v            v         +-----------+    +-----------+
-  CODE_CONTEXT  EXTERNAL_   |plan-coder |    |plan-coder |
-     |          CONTEXT     |  file1    |    |  file2    |
-     +-----+------+         | (fetches  |    | (fetches  |
-           |                |  from RP) |    |  from RP) |
-           v                +-----+-----+    +-----+-----+
-     +----------+                 |                |
-     | planner  |                 v                v
-     | (uses    |             COMPLETE          COMPLETE
-     | RepoPrompt)                |                |
-     +----+-----+                 +-------+--------+
-          |                               |
-          v                               v
-  +=================+             +================+
-  | CHAT_ID         |             | Results Table  |
-  | + file lists    |             +================+
-  +=================+
+       /plan command                      /code command
+             │                                  │
+             ▼                                  ▼
+     ┌───────────────┐                  ┌───────────────┐
+     │  Parse Input  │                  │  Fetch Plan   │
+     │  task:        │                  │from RepoPrompt│
+     │  research:    │                  │  (chat_id)    │
+     └───────┬───────┘                  └───────┬───────┘
+             │                                  │
+             ▼                                  ▼
+     ┌───────┴───────┐                  ┌───────┴───────┐
+     │               │                  │               │
+     ▼               ▼                  ▼               ▼
+┌──────────┐  ┌──────────┐        ┌──────────┐  ┌──────────┐
+│code-scout│  │doc-scout │        │plan-coder│  │plan-coder│
+└────┬─────┘  └────┬─────┘        │  file1   │  │  file2   │
+     │             │              │(fetches  │  │(fetches  │
+     ▼             ▼              │ from RP) │  │ from RP) │
+ CODE_CONTEXT  EXTERNAL_          └────┬─────┘  └────┬─────┘
+     │         CONTEXT                 │             │
+     └──────┬──────┘                   ▼             ▼
+            │                       COMPLETE      COMPLETE
+            ▼                          │             │
+     ┌───────────┐                     └──────┬──────┘
+     │  planner  │                            │
+     │  (uses    │                            ▼
+     │ RepoPrompt│                    ┌───────────────┐
+     └─────┬─────┘                    │ Results Table │
+           │                          └───────────────┘
+           ▼
+   ┌────────────────┐
+   │    CHAT_ID     │
+   │  + file lists  │
+   └────────────────┘
 ```
 
 ## Agents

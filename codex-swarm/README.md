@@ -46,43 +46,40 @@ Takes the plan from `/plan` and spawns plan-coders in parallel to implement all 
 ## Architecture Diagram
 
 ```
-/plan command                          /code command
-     |                                      |
-     v                                      v
-+==============+                    +================+
-| Parse Input  |                    | Parse Plan     |
-| task:        |                    | (plan:)        |
-| research:    |                    +========+=======+
-+======+======+                             |
-       |                                    v
-       v                           +--------+--------+
-+------+------+                    | Extract per-file|
-|             |                    | instructions    |
-v             v                    +--------+--------+
-+----------+ +----------+                   |
-|code-scout| |doc-scout |                   v
-+----+-----+ +----+-----+          +--------+--------+
-     |            |                |                 |
-     |            |                v                 v
-     v            v         +-----------+    +-----------+
-  CODE_CONTEXT  EXTERNAL_   |plan-coder |    |plan-coder |
-     |          CONTEXT     |  file1    |    |  file2    |
-     +-----+------+         | (receives |    | (receives |
-           |                |  plan     |    |  plan     |
-           v                |  directly)|    |  directly)|
-     +----------+           +-----+-----+    +-----+-----+
-     | planner  |                 |                |
-     | (uses    |                 v                v
-     | Codex    |             COMPLETE          COMPLETE
-     | gpt-5.2) |                 |                |
-     |          |                 +-------+--------+
-     +----+-----+                         |
-          |                               v
-          v                       +================+
-  +=================+             | Results Table  |
-  | FULL PLAN       |             +================+
-  | + file lists    |
-  +=================+
+       /plan command                      /code command
+             │                                  │
+             ▼                                  ▼
+     ┌───────────────┐                  ┌───────────────┐
+     │  Parse Input  │                  │  Parse Plan   │
+     │  task:        │                  │ files_to_edit │
+     │  research:    │                  │files_to_create│
+     └───────┬───────┘                  └───────┬───────┘
+             │                                  │
+             ▼                                  ▼
+     ┌───────┴───────┐                  ┌───────┴───────┐
+     │               │                  │               │
+     ▼               ▼                  ▼               ▼
+┌──────────┐  ┌──────────┐        ┌──────────┐  ┌──────────┐
+│code-scout│  │doc-scout │        │plan-coder│  │plan-coder│
+└────┬─────┘  └────┬─────┘        │  file1   │  │  file2   │
+     │             │              │(receives │  │(receives │
+     ▼             ▼              │ plan     │  │ plan     │
+ CODE_CONTEXT  EXTERNAL_          │ directly)│  │ directly)│
+     │         CONTEXT            └────┬─────┘  └────┬─────┘
+     └──────┬──────┘                   │             │
+            │                          ▼             ▼
+            ▼                       COMPLETE      COMPLETE
+     ┌───────────┐                     │             │
+     │  planner  │                     └──────┬──────┘
+     │  (Codex   │                            │
+     │  gpt-5.2) │                            ▼
+     └─────┬─────┘                    ┌───────────────┐
+           │                          │ Results Table │
+           ▼                          └───────────────┘
+   ┌────────────────┐
+   │   FULL PLAN    │
+   │  + file lists  │
+   └────────────────┘
 ```
 
 ## Agents

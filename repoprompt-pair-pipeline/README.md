@@ -70,99 +70,90 @@ The orchestrator spawns specialized agents via the `Task` tool:
 ## Architecture Diagram
 
 ```
-                                         ORCHESTRATOR
-                                              |
-                +-----------------------------+-----------------------------+
-                |                                                           |
-                v                                                           v
-      +==================+                                        +==================+
-      | command:start    |                                        | command:fetch    |
-      | command:start-   |                                        |                  |
-      |         resume   |                                        |                  |
-      +========+=========+                                        +========+=========+
-               |                                                           |
-               | task:                                                     | chat_id:
-               v                                                           |
-+================================+                                         |
-|  ITERATIVE DISCOVERY LOOP      |                                         |
-|  (Human-in-the-loop control)   |                                         |
-|                                |                                         |
-|  +-------------------+         |                                         |
-|  | code-scout        |         |                                         |
-|  | (mode: info/dir)  |         |                                         |
-|  +---------+---------+         |                                         |
-|            |                   |                                         |
-|            | CODE_CONTEXT      |                                         |
-|            v                   |                                         |
-|  +-------------------+         |                                         |
-|  | CHECKPOINT        |         |                                         |
-|  | (AskUserQuestion) |         |                                         |
-|  | 1. Clarifying Qs  |         |                                         |
-|  | 2. "Add research" |         |                                         |
-|  |  or "Complete"    |         |                                         |
-|  +---------+---------+         |                                         |
-|            |                   |                                         |
-|       +----+----+              |                                         |
-|       |         |              |                                         |
-|       v         |              |                                         |
-|  +---------+    |              |                                         |
-|  |doc-scout|    |              |                                         |
-|  +----+----+    |              |                                         |
-|       |         |              |                                         |
-|       | EXTERNAL_CONTEXT       |                                         |
-|       v         |              |                                         |
-|  +-------------------+         |                                         |
-|  | CHECKPOINT        |         |                                         |
-|  | (AskUserQuestion) |         |                                         |
-|  | 1. Clarifying Qs  |         |                                         |
-|  | 2. "Add more" or  |         |                                         |
-|  |    "Complete"     |         |                                         |
-|  +----+----+---------+         |                                         |
-|       |    |                   |                                         |
-|       |    +---> (loop back)   |                                         |
-|       |                        |                                         |
-|       | context_package        |                                         |
-+========+=======================+                                         |
-         |                                                                 |
-         v                                                                 v
-+------------------+                                          +------------------+
-| planner-start    |                                          | planner-fetch    |
-| or planner-start-|                                          |                  |
-|          resume  |                                          | chat_id:         |
-|                  |                                          |                  |
-| instructions:    |                                          +--------+---------+
-| context_package  |                                                   |
-+--------+---------+                                                   |
-         |                                                             |
-         | chat_id +                                                   | chat_id +
-         | file_lists                                                  | file_lists
-         v                                                             v
-+------------------+                                          +------------------+
-| plan-coder       |                                          | plan-coder       |
-| (1/file)         |                                          | (1/file)         |
-|                  |                                          |                  |
-| Input:           |                                          | Input:           |
-|  chat_id         |                                          |  chat_id         |
-|  target_file     |                                          |  target_file     |
-|  action          |                                          |  action          |
-|                  |                                          |                  |
-| Fetches plan     |                                          | Fetches plan     |
-| from RepoPrompt  |                                          | from RepoPrompt  |
-+--------+---------+                                          +--------+---------+
-         |                                                             |
-         | status:                                                     | status:
-         | COMPLETE/BLOCKED                                            | COMPLETE/BLOCKED
-         |                                                             |
-         +----------------------------+--------------------------------+
-                                      |
-                                      v
-                              +------------------+
-                              |   ORCHESTRATOR   |
-                              |  Phase 3 Review  |
-                              |                  |
-                              | Collects results |
-                              | Reports to user  |
-                              +------------------+
+                              ORCHESTRATOR
+                                   │
+           ┌───────────────────────┴───────────────────────┐
+           │                                               │
+           ▼                                               ▼
+┌────────────────────┐                          ┌────────────────────┐
+│  command:start or  │                          │   command:fetch    │
+│  start-resume      │                          │                    │
+└─────────┬──────────┘                          └─────────┬──────────┘
+          │                                               │
+          ▼                                               │ chat_id
+┌─────────────────────────────────────────────────────────┐    │
+│              ITERATIVE DISCOVERY LOOP                   │    │
+│              (Human-in-the-loop control)                │    │
+│                                                         │    │
+│  ┌─────────────────┐                                    │    │
+│  │   code-scout    │                                    │    │
+│  └────────┬────────┘                                    │    │
+│           │                                             │    │
+│           │ CODE_CONTEXT                                │    │
+│           ▼                                             │    │
+│  ┌─────────────────┐                                    │    │
+│  │   CHECKPOINT    │                                    │    │
+│  │ (AskUserQuestion│                                    │    │
+│  │ 1. Clarifying Qs│                                    │    │
+│  │ 2. "Add research│                                    │    │
+│  │  or "Complete"  │                                    │    │
+│  └────────┬────────┘                                    │    │
+│           │                                             │    │
+│      ┌────┴────┐                                        │    │
+│      │         │                                        │    │
+│      ▼         │                                        │    │
+│  ┌─────────┐   │                                        │    │
+│  │doc-scout│   │                                        │    │
+│  └────┬────┘   │                                        │    │
+│       │        │                                        │    │
+│       │ EXTERNAL_CONTEXT                                │    │
+│       ▼        │                                        │    │
+│  ┌─────────────────┐                                    │    │
+│  │   CHECKPOINT    │                                    │    │
+│  │ 1. Clarifying Qs│                                    │    │
+│  │ 2. "Add more"   │                                    │    │
+│  │  or "Complete"  │                                    │    │
+│  └───┬────┬────────┘                                    │    │
+│      │    │                                             │    │
+│      │    └───► (loop back)                             │    │
+│      │                                                  │    │
+│      │ context_package                                  │    │
+└──────┼──────────────────────────────────────────────────┘    │
+       │                                                       │
+       ▼                                                       ▼
+┌─────────────────┐                                 ┌─────────────────┐
+│  planner-start  │                                 │  planner-fetch  │
+│       or        │                                 │                 │
+│ planner-start-  │                                 │ (fetches from   │
+│      resume     │                                 │  RepoPrompt)    │
+│ (RepoPrompt)    │                                 └────────┬────────┘
+└────────┬────────┘                                          │
+         │                                                   │
+         │ chat_id + file_lists                              │ chat_id + file_lists
+         ▼                                                   ▼
+┌─────────────────┐                                 ┌─────────────────┐
+│   plan-coder    │                                 │   plan-coder    │
+│    (1/file)     │                                 │    (1/file)     │
+│                 │                                 │                 │
+│ Input:          │                                 │ Input:          │
+│  chat_id        │                                 │  chat_id        │
+│  target_file    │                                 │  target_file    │
+│                 │                                 │                 │
+│ Fetches plan    │                                 │ Fetches plan    │
+│ from RepoPrompt │                                 │ from RepoPrompt │
+└────────┬────────┘                                 └────────┬────────┘
+         │                                                   │
+         │ status: COMPLETE/BLOCKED                          │
+         └─────────────────────┬─────────────────────────────┘
+                               │
+                               ▼
+                    ┌─────────────────┐
+                    │  ORCHESTRATOR   │
+                    │ Phase 3 Review  │
+                    │                 │
+                    │ Collects results│
+                    │ Reports to user │
+                    └─────────────────┘
 ```
 
 **Key flows:**

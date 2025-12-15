@@ -43,42 +43,41 @@ Takes a plan and spawns plan-coders in parallel to implement all files.
 ## Architecture Diagram
 
 ```
-/plan command                          /code command
-     |                                      |
-     v                                      v
-+==============+                    +================+
-| Parse Input  |                    | Parse Plan     |
-| task:        |                    | - files_to_edit|
-| research:    |                    | - files_to_create|
-+======+======+                    | - per-file instr|
-       |                            +========+=======+
-       v                                     |
-+------+------+                              v
-|             |                     +--------+--------+
-v             v                     |                 |
-+----------+ +----------+           v                 v
-|code-scout| |doc-scout |    +-----------+    +-----------+
-+----+-----+ +----+-----+    |plan-coder |    |plan-coder |
-     |            |          |  file1    |    |  file2    |
-     |            |          +-----+-----+    +-----+-----+
-     v            v                |                |
-  CODE_CONTEXT  EXTERNAL_CONTEXT   v                v
-     |            |            COMPLETE          COMPLETE
-     +-----+------+                |                |
-           |                       +-------+--------+
-           v                               |
-     +----------+                          v
-     | planner  |                  +================+
-     +----+-----+                  | Results Table  |
-          |                        +================+
-          v
-  +=================+
-  | IMPLEMENTATION  |
-  | PLAN            |
-  | - files_to_edit |
-  | - files_to_create|
-  | - per-file instr|
-  +=================+
+       /plan command                      /code command
+             │                                  │
+             ▼                                  ▼
+     ┌───────────────┐                  ┌───────────────┐
+     │  Parse Input  │                  │  Parse Plan   │
+     │  task:        │                  │ files_to_edit │
+     │  research:    │                  │files_to_create│
+     └───────┬───────┘                  └───────┬───────┘
+             │                                  │
+             ▼                                  ▼
+     ┌───────┴───────┐                  ┌───────┴───────┐
+     │               │                  │               │
+     ▼               ▼                  ▼               ▼
+┌──────────┐  ┌──────────┐        ┌──────────┐  ┌──────────┐
+│code-scout│  │doc-scout │        │plan-coder│  │plan-coder│
+└────┬─────┘  └────┬─────┘        │  file1   │  │  file2   │
+     │             │              └────┬─────┘  └────┬─────┘
+     ▼             ▼                   │             │
+ CODE_CONTEXT  EXTERNAL_               ▼             ▼
+     │         CONTEXT              COMPLETE      COMPLETE
+     └──────┬──────┘                   │             │
+            │                          └──────┬──────┘
+            ▼                                 │
+     ┌───────────┐                            ▼
+     │  planner  │                    ┌───────────────┐
+     └─────┬─────┘                    │ Results Table │
+           │                          └───────────────┘
+           ▼
+   ┌────────────────┐
+   │ IMPLEMENTATION │
+   │     PLAN       │
+   │ files_to_edit  │
+   │files_to_create │
+   │ per-file instr │
+   └────────────────┘
 ```
 
 ## Agents

@@ -62,91 +62,84 @@ The orchestrator spawns specialized agents via the `Task` tool:
 ## Architecture Diagram
 
 ```
-                                    ORCHESTRATOR
-                                         |
-                                         v
-                              +==================+
-                              | command:start    |
-                              | command:start-   |
-                              |         resume   |
-                              +========+=========+
-                                       |
-                                       | task:
-                                       v
-                        +================================+
-                        |  ITERATIVE DISCOVERY LOOP      |
-                        |  (Human-in-the-loop control)   |
-                        |                                |
-                        |  +-------------------+         |
-                        |  | code-scout        |         |
-                        |  | (mode: info/dir)  |         |
-                        |  +---------+---------+         |
-                        |            |                   |
-                        |            | CODE_CONTEXT      |
-                        |            v                   |
-                        |  +-------------------+         |
-                        |  | CHECKPOINT        |         |
-                        |  | (AskUserQuestion) |         |
-                        |  | 1. Clarifying Qs  |         |
-                        |  | 2. "Add research" |         |
-                        |  |  or "Complete"    |         |
-                        |  +---------+---------+         |
-                        |            |                   |
-                        |       +----+----+              |
-                        |       |         |              |
-                        |       v         |              |
-                        |  +---------+    |              |
-                        |  |doc-scout|    |              |
-                        |  +----+----+    |              |
-                        |       |         |              |
-                        |       | EXTERNAL_CONTEXT       |
-                        |       v         |              |
-                        |  +-------------------+         |
-                        |  | CHECKPOINT        |         |
-                        |  | (AskUserQuestion) |         |
-                        |  | 1. Clarifying Qs  |         |
-                        |  | 2. "Add more" or  |         |
-                        |  |    "Complete"     |         |
-                        |  +----+----+---------+         |
-                        |       |    |                   |
-                        |       |    +---> (loop back)   |
-                        |       |                        |
-                        |       | context_package        |
-                        +========+=======================+
-                                 |
-                                 v
-                        +------------------+
-                        | planner-start    |
-                        | or planner-start-|
-                        |          resume  |
-                        |                  |
-                        | instructions:    |
-                        | context_package  |
-                        +--------+---------+
-                                 |
-                                 | FULL PLAN +
-                                 | file_lists
-                                 v
-                        +------------------+
-                        | plan-coder       |
-                        | (1/file)         |
-                        |                  |
-                        | Input:           |
-                        |  target_file     |
-                        |  action          |
-                        |  plan (direct)   |
-                        +--------+---------+
-                                 |
-                                 | status:
-                                 | COMPLETE/BLOCKED
-                                 v
-                        +------------------+
-                        |   ORCHESTRATOR   |
-                        |  Phase 3 Review  |
-                        |                  |
-                        | Collects results |
-                        | Reports to user  |
-                        +------------------+
+                              ORCHESTRATOR
+                                   │
+                                   ▼
+                        ┌────────────────────┐
+                        │  command:start or  │
+                        │  start-resume      │
+                        └─────────┬──────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────┐
+│              ITERATIVE DISCOVERY LOOP                   │
+│              (Human-in-the-loop control)                │
+│                                                         │
+│  ┌─────────────────┐                                    │
+│  │   code-scout    │                                    │
+│  └────────┬────────┘                                    │
+│           │                                             │
+│           │ CODE_CONTEXT                                │
+│           ▼                                             │
+│  ┌─────────────────┐                                    │
+│  │   CHECKPOINT    │                                    │
+│  │ (AskUserQuestion│                                    │
+│  │ 1. Clarifying Qs│                                    │
+│  │ 2. "Add research│                                    │
+│  │  or "Complete"  │                                    │
+│  └────────┬────────┘                                    │
+│           │                                             │
+│      ┌────┴────┐                                        │
+│      │         │                                        │
+│      ▼         │                                        │
+│  ┌─────────┐   │                                        │
+│  │doc-scout│   │                                        │
+│  └────┬────┘   │                                        │
+│       │        │                                        │
+│       │ EXTERNAL_CONTEXT                                │
+│       ▼        │                                        │
+│  ┌─────────────────┐                                    │
+│  │   CHECKPOINT    │                                    │
+│  │ 1. Clarifying Qs│                                    │
+│  │ 2. "Add more"   │                                    │
+│  │  or "Complete"  │                                    │
+│  └───┬────┬────────┘                                    │
+│      │    │                                             │
+│      │    └───► (loop back)                             │
+│      │                                                  │
+│      │ context_package                                  │
+└──────┼──────────────────────────────────────────────────┘
+       │
+       ▼
+┌─────────────────┐
+│  planner-start  │
+│       or        │
+│ planner-start-  │
+│      resume     │
+│ (Codex gpt-5.2) │
+└────────┬────────┘
+         │
+         │ FULL PLAN + file_lists
+         ▼
+┌─────────────────┐
+│   plan-coder    │
+│    (1/file)     │
+│                 │
+│ Input:          │
+│  target_file    │
+│  action         │
+│  plan (direct)  │
+└────────┬────────┘
+         │
+         │ status: COMPLETE/BLOCKED
+         ▼
+┌─────────────────┐
+│  ORCHESTRATOR   │
+│ Phase 3 Review  │
+│                 │
+│ Collects results│
+│ Reports to user │
+└─────────────────┘
 ```
 
 **Key flows:**
