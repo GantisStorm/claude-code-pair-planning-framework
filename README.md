@@ -10,8 +10,8 @@ A collection of multi-agent orchestration plugins for Claude Code. These plugins
 | [pair-swarm](#pair-swarm) | One-shot | Direct | None | Well-defined tasks, no dependencies |
 | [repoprompt-pair-pipeline](#repoprompt-pair-pipeline) | Iterative | RepoPrompt | RepoPrompt | Exploratory tasks with RepoPrompt |
 | [repoprompt-swarm](#repoprompt-swarm) | One-shot | RepoPrompt | RepoPrompt | Well-defined tasks with RepoPrompt |
-| [codex-pair-pipeline](#codex-pair-pipeline) | Iterative | Codex (gpt-5.2) | Codex | Exploratory tasks with Codex |
-| [codex-swarm](#codex-swarm) | One-shot | Codex (gpt-5.2) | Codex | Well-defined tasks with Codex |
+| [codex-pair-pipeline](#codex-pair-pipeline) | Iterative | Codex | Codex MCP | Exploratory tasks with Codex |
+| [codex-swarm](#codex-swarm) | One-shot | Codex | Codex MCP | Well-defined tasks with Codex |
 
 ### Pattern Comparison
 
@@ -40,7 +40,20 @@ A collection of multi-agent orchestration plugins for Claude Code. These plugins
 |---------------|------------|--------------|
 | pair-* | None | No additional setup |
 | repoprompt-* | RepoPrompt MCP | [RepoPrompt App](https://repoprompt.com) |
-| codex-* | Codex MCP ([tuannvm/codex-mcp-server](https://github.com/tuannvm/codex-mcp-server)) | `claude mcp add codex-cli -- npx -y codex-mcp-server` |
+| codex-* | [Codex MCP Server](https://github.com/tuannvm/codex-mcp-server) | See below |
+
+#### Codex MCP Server Setup (for codex-* plugins)
+
+**Prerequisites:**
+1. Install OpenAI Codex CLI v0.50.0+: `npm i -g @openai/codex` or `brew install codex`
+2. Configure API key: `codex login --api-key "your-openai-api-key"`
+
+**Install MCP Server:**
+```bash
+claude mcp add codex-cli -- npx -y codex-mcp-server
+```
+
+> **Note:** The `OPENAI_API_KEY` environment variable is no longer supported. You must use `codex login` to configure authentication.
 
 ---
 
