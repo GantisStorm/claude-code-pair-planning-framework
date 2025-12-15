@@ -24,31 +24,31 @@ All six plugins are built on **two fundamental execution patterns**. Understandi
 ### Pipeline Pattern (Iterative, Human-in-the-Loop)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    ITERATIVE DISCOVERY LOOP                      │
-│                                                                  │
-│   code-scout ──► CHECKPOINT ──► doc-scout ──► CHECKPOINT ──►... │
-│        │              │              │              │            │
-│        │         User decides:  User decides:  User decides:    │
-│        │         "Add research" "Add more"    "Complete"        │
-│        │              │              │              │            │
-│        └──────────────┴──────────────┴──────────────┘            │
-│                              │                                   │
-│                    context_package                               │
-└──────────────────────────────┼───────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                       ITERATIVE DISCOVERY LOOP                         │
+│                                                                        │
+│  code-scout ───► CHECKPOINT ───► doc-scout ───► CHECKPOINT ───► ...    │
+│       │               │               │               │                │
+│       │          User decides    User decides    User decides          │
+│       │         "Add research"   "Add more"      "Complete"            │
+│       │               │               │               │                │
+│       └───────────────┴───────────────┴───────────────┘                │
+│                               │                                        │
+│                       context_package                                  │
+└───────────────────────────────┼────────────────────────────────────────┘
+                                │
+                                ▼
+                     ┌────────────────────┐
+                     │      PLANNER       │
+                     │   (creates plan)   │
+                     └─────────┬──────────┘
                                │
-                               ▼
-                    ┌──────────────────┐
-                    │     PLANNER      │
-                    │  (creates plan)  │
-                    └────────┬─────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              ▼              ▼              ▼
-        ┌──────────┐  ┌──────────┐  ┌──────────┐
-        │plan-coder│  │plan-coder│  │plan-coder│  (parallel)
-        │  file1   │  │  file2   │  │  file3   │
-        └──────────┘  └──────────┘  └──────────┘
+               ┌───────────────┼───────────────┐
+               ▼               ▼               ▼
+        ┌────────────┐  ┌────────────┐  ┌────────────┐
+        │ plan-coder │  │ plan-coder │  │ plan-coder │  (parallel)
+        │   file1    │  │   file2    │  │   file3    │
+        └────────────┘  └────────────┘  └────────────┘
 ```
 
 **Characteristics:**
@@ -64,40 +64,41 @@ All six plugins are built on **two fundamental execution patterns**. Understandi
 ### Swarm Pattern (One-Shot, Fast Execution)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         /plan COMMAND                            │
-│                                                                  │
-│        ┌──────────────────┬──────────────────┐                  │
-│        ▼                  ▼                  │                  │
-│   ┌──────────┐      ┌──────────┐             │                  │
-│   │code-scout│      │doc-scout │  (parallel) │                  │
-│   └────┬─────┘      └────┬─────┘             │                  │
-│        │                 │                   │                  │
-│        └────────┬────────┘                   │                  │
-│                 ▼                            │                  │
-│          ┌──────────┐                        │                  │
-│          │ PLANNER  │                        │                  │
-│          └────┬─────┘                        │                  │
-│               │                              │                  │
-│               ▼                              │                  │
-│     IMPLEMENTATION PLAN                      │                  │
-│     (output to user)                         │                  │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│                  /plan COMMAND                   │
+│                                                  │
+│          ┌─────────────┬─────────────┐           │
+│          ▼             ▼             │           │
+│    ┌───────────┐ ┌───────────┐       │           │
+│    │code-scout │ │ doc-scout │  (parallel)       │
+│    └─────┬─────┘ └─────┬─────┘       │           │
+│          │             │             │           │
+│          └──────┬──────┘             │           │
+│                 ▼                    │           │
+│          ┌───────────┐               │           │
+│          │  PLANNER  │               │           │
+│          └─────┬─────┘               │           │
+│                │                     │           │
+│                ▼                     │           │
+│       IMPLEMENTATION PLAN            │           │
+│        (output to user)              │           │
+└──────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────┐
-│                         /code COMMAND                            │
-│                                                                  │
-│                    Parse plan from input                         │
-│                             │                                    │
-│              ┌──────────────┼──────────────┐                    │
-│              ▼              ▼              ▼                    │
-│        ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
-│        │plan-coder│  │plan-coder│  │plan-coder│  (parallel)     │
-│        │  file1   │  │  file2   │  │  file3   │                 │
-│        └──────────┘  └──────────┘  └──────────┘                 │
-│                                                                  │
-│                      RESULTS TABLE                               │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│                  /code COMMAND                   │
+│                                                  │
+│              Parse plan from input               │
+│                       │                          │
+│       ┌───────────────┼───────────────┐          │
+│       ▼               ▼               ▼          │
+│ ┌────────────┐ ┌────────────┐ ┌────────────┐     │
+│ │ plan-coder │ │ plan-coder │ │ plan-coder │     │
+│ │   file1    │ │   file2    │ │   file3    │     │
+│ └────────────┘ └────────────┘ └────────────┘     │
+│                   (parallel)                     │
+│                                                  │
+│                 RESULTS TABLE                    │
+└──────────────────────────────────────────────────┘
 ```
 
 **Characteristics:**
@@ -139,27 +140,27 @@ The **critical architectural difference** between plugin families is **how the i
 ### Pattern A: Direct Plan Distribution (pair-*, codex-*)
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                        ORCHESTRATOR                               │
-│                                                                   │
-│  ┌─────────┐         ┌─────────────────────────────────────────┐ │
-│  │ PLANNER │────────►│          FULL PLAN TEXT                 │ │
-│  └─────────┘         │  (returned directly to orchestrator)    │ │
-│                      └─────────────────────────────────────────┘ │
-│                                      │                           │
-│           ┌──────────────────────────┼──────────────────────┐    │
-│           │                          │                      │    │
-│           ▼                          ▼                      ▼    │
-│  ┌────────────────┐        ┌────────────────┐      ┌────────────────┐
-│  │  plan-coder    │        │  plan-coder    │      │  plan-coder    │
-│  │                │        │                │      │                │
-│  │ target: file1  │        │ target: file2  │      │ target: file3  │
-│  │ plan: [instr1] │        │ plan: [instr2] │      │ plan: [instr3] │
-│  │                │        │                │      │                │
-│  │ (plan passed   │        │ (plan passed   │      │ (plan passed   │
-│  │  IN PROMPT)    │        │  IN PROMPT)    │      │  IN PROMPT)    │
-│  └────────────────┘        └────────────────┘      └────────────────┘
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                             ORCHESTRATOR                                │
+│                                                                         │
+│  ┌───────────┐         ┌─────────────────────────────────────────────┐  │
+│  │  PLANNER  │────────►│             FULL PLAN TEXT                  │  │
+│  └───────────┘         │    (returned directly to orchestrator)      │  │
+│                        └──────────────────────┬──────────────────────┘  │
+│                                               │                         │
+│                 ┌────────────────────────────┼────────────────────┐     │
+│                 │                            │                    │     │
+│                 ▼                            ▼                    ▼     │
+│       ┌──────────────┐            ┌──────────────┐      ┌──────────────┐│
+│       │  plan-coder  │            │  plan-coder  │      │  plan-coder  ││
+│       │              │            │              │      │              ││
+│       │target: file1 │            │target: file2 │      │target: file3 ││
+│       │plan: [instr1]│            │plan: [instr2]│      │plan: [instr3]││
+│       │              │            │              │      │              ││
+│       │(plan passed  │            │(plan passed  │      │(plan passed  ││
+│       │ IN PROMPT)   │            │ IN PROMPT)   │      │ IN PROMPT)   ││
+│       └──────────────┘            └──────────────┘      └──────────────┘│
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 **How it works:**
@@ -182,44 +183,44 @@ The **critical architectural difference** between plugin families is **how the i
 ### Pattern B: MCP Plan Storage & Fetch (repoprompt-*)
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                        ORCHESTRATOR                               │
-│                                                                   │
-│  ┌─────────┐         ┌─────────────────────────────────────────┐ │
-│  │ PLANNER │────────►│   RepoPrompt MCP                        │ │
-│  │         │         │   ┌─────────────────────────────────┐   │ │
-│  │ calls   │         │   │  PLAN STORED IN CHAT SESSION    │   │ │
-│  │ context_│         │   │  chat_id: abc123                │   │ │
-│  │ builder │         │   └─────────────────────────────────┘   │ │
-│  └─────────┘         └─────────────────────────────────────────┘ │
-│       │                              │                           │
-│       │ returns: chat_id + file_lists                            │
-│       ▼                              │                           │
-│  ┌─────────────┐                     │                           │
-│  │ Orchestrator│                     │                           │
-│  │ only knows  │                     │                           │
-│  │ chat_id &   │                     │                           │
-│  │ file list   │                     │                           │
-│  └─────────────┘                     │                           │
-│           │                          │                           │
-│           ▼                          ▼                           │
-│  ┌────────────────┐        ┌────────────────┐                    │
-│  │  plan-coder    │        │  plan-coder    │                    │
-│  │                │        │                │                    │
-│  │ chat_id: abc123│        │ chat_id: abc123│                    │
-│  │ target: file1  │        │ target: file2  │                    │
-│  │                │        │                │                    │
-│  │ FETCHES plan   │        │ FETCHES plan   │                    │
-│  │ via mcp__Repo  │        │ via mcp__Repo  │                    │
-│  │ Prompt__chats  │        │ Prompt__chats  │                    │
-│  └───────┬────────┘        └───────┬────────┘                    │
-│          │                         │                             │
-│          ▼                         ▼                             │
-│  ┌───────────────────────────────────────────┐                   │
-│  │            RepoPrompt MCP                  │                   │
-│  │  (each coder fetches from same chat_id)   │                   │
-│  └───────────────────────────────────────────┘                   │
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                             ORCHESTRATOR                                │
+│                                                                         │
+│  ┌───────────┐         ┌─────────────────────────────────────────────┐  │
+│  │  PLANNER  │────────►│              RepoPrompt MCP                 │  │
+│  │           │         │  ┌───────────────────────────────────────┐  │  │
+│  │   calls   │         │  │     PLAN STORED IN CHAT SESSION       │  │  │
+│  │ context_  │         │  │         chat_id: abc123               │  │  │
+│  │  builder  │         │  └───────────────────────────────────────┘  │  │
+│  └───────────┘         └──────────────────────┬──────────────────────┘  │
+│        │                                      │                         │
+│        │ returns: chat_id + file_lists        │                         │
+│        ▼                                      │                         │
+│  ┌─────────────────┐                          │                         │
+│  │  Orchestrator   │                          │                         │
+│  │   only knows    │                          │                         │
+│  │   chat_id &     │                          │                         │
+│  │   file list     │                          │                         │
+│  └────────┬────────┘                          │                         │
+│           │                                   │                         │
+│           ▼                                   ▼                         │
+│  ┌─────────────────┐                 ┌─────────────────┐                │
+│  │   plan-coder    │                 │   plan-coder    │                │
+│  │                 │                 │                 │                │
+│  │ chat_id: abc123 │                 │ chat_id: abc123 │                │
+│  │ target: file1   │                 │ target: file2   │                │
+│  │                 │                 │                 │                │
+│  │  FETCHES plan   │                 │  FETCHES plan   │                │
+│  │  via mcp__Repo  │                 │  via mcp__Repo  │                │
+│  │  Prompt__chats  │                 │  Prompt__chats  │                │
+│  └────────┬────────┘                 └────────┬────────┘                │
+│           │                                   │                         │
+│           ▼                                   ▼                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                        RepoPrompt MCP                             │  │
+│  │           (each coder fetches from same chat_id)                  │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 **How it works:**
@@ -472,17 +473,17 @@ You are a senior software architect specializing in code design and implementati
 ```
 Do you need iterative discovery with checkpoints?
 │
-├── YES → Do you have an MCP preference?
-│   │
-│   ├── RepoPrompt (best context management) → repoprompt-pair-pipeline
-│   ├── Codex (gpt-5.2 reasoning) → codex-pair-pipeline
-│   └── None (standalone) → pair-pipeline
+├─► YES ─► Do you have an MCP preference?
+│          │
+│          ├─► RepoPrompt (best context) ─► repoprompt-pair-pipeline
+│          ├─► Codex (gpt-5.2 reasoning) ─► codex-pair-pipeline
+│          └─► None (standalone) ─────────► pair-pipeline
 │
-└── NO → Do you have an MCP preference?
-    │
-    ├── RepoPrompt → repoprompt-swarm
-    ├── Codex → codex-swarm
-    └── None → pair-swarm
+└─► NO ──► Do you have an MCP preference?
+           │
+           ├─► RepoPrompt ─► repoprompt-swarm
+           ├─► Codex ──────► codex-swarm
+           └─► None ───────► pair-swarm
 ```
 
 ### Quick Reference
