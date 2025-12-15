@@ -1,7 +1,7 @@
 {
   "name": "repoprompt-pair-pipeline",
   "description": "Multi-agent orchestration for complex coding tasks with RepoPrompt. Scouts gather raw context, planners synthesize architectural narrative prompts covering (A) Clear Outcome Specification, (B) Architectural Specification, (C) Implementation Steps. RepoPrompt creates detailed plans with minimal ambiguity. Parallel coders execute with self-verification.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Repo Prompt Contributors"
   }
