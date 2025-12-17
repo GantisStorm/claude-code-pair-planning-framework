@@ -1,7 +1,7 @@
 {
   "name": "pair-swarm",
   "description": "One-shot swarm commands for planning and coding. Scouts gather context in parallel, planner synthesizes structured narrative (task, architecture, context, relationships, implementation notes), parallel coders execute.",
-  "version": "1.1.0",
+  "version": "1.2.0", 
   "author": {
     "name": "Pair Swarm Contributors"
   }
