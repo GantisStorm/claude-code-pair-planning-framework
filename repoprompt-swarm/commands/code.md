@@ -11,14 +11,14 @@ You are the Code orchestrator. You fetch a plan from RepoPrompt and spawn plan-c
 1. **One-shot execution** - Spawn all coders at once, wait for results
 2. **Maximize parallelism** - All file implementations run in parallel
 3. **Report results** - Collect and summarize all coder outputs
-4. **You coordinate, not execute** - Never edit files directly
+4. **You coordinate, not execute** - Never edit files directly; spawn agents for all work
 
 ## Input
 
 Parse `$ARGUMENTS`:
 
 ```
-chat_id: [RepoPrompt chat ID containing the plan]
+chat_id: [RepoPrompt chat ID from /repoprompt-swarm:plan]
 ```
 
 ## Process
@@ -33,14 +33,14 @@ Call `mcp__RepoPrompt__chats` with:
 ### Step 2: Parse Plan
 
 From the chat log, extract the **last assistant message** as the architectural plan. Parse:
-1. **files_to_edit** - List of existing files to modify
-2. **files_to_create** - List of new files to create
+1. **files_to_edit** - Files mentioned with `[edit]` action
+2. **files_to_create** - Files mentioned with `[create]` action
 
 ### Step 3: Spawn Coders in Parallel
 
 **IMPORTANT**: Spawn ALL coders in a single message with multiple Task calls.
 
-For each file in the plan:
+For each file in the plan, pass the chat_id (coders will fetch their own instructions):
 
 ```
 Task repoprompt-swarm:plan-coder
@@ -54,8 +54,8 @@ Task repoprompt-swarm:plan-coder
 ```
 
 **Action mapping:**
-- Files from `files_to_edit` -> `action: edit`
-- Files from `files_to_create` -> `action: create`
+- Files marked `[edit]` -> `action: edit`
+- Files marked `[create]` -> `action: create`
 
 ### Step 4: Collect Results
 
@@ -104,7 +104,14 @@ ERROR: Could not fetch plan from RepoPrompt.
 
 **Plan parsing failed:**
 ```
-ERROR: Could not parse plan. Expected the plan to contain file lists.
+ERROR: Could not parse plan.
+Expected the plan to contain file lists with [edit] or [create] markers.
+```
+
+**No files in plan:**
+```
+ERROR: No files found in plan.
+Ensure the plan contains files marked with [edit] or [create] actions.
 ```
 
 **Some coders blocked:**

@@ -33,7 +33,7 @@ A **pluggable multi-agent planning framework** for Claude Code. Swap planning en
 ```
 
 **The framework provides:**
-- **Fixed agents**: code-scout, doc-scout, plan-coder (same across all plugins)
+- **Shared agents**: code-scout, doc-scout, plan-coder (same implementation across plugins)
 - **Pluggable planners**: Swap between Claude, RepoPrompt MCP, or Codex MCP
 - **Two execution patterns**: Pipeline (iterative) or Swarm (one-shot)
 
@@ -100,41 +100,49 @@ The framework offers **two execution patterns** that work with any planning engi
 ### Swarm Pattern (One-Shot, Fast Execution)
 
 ```
-┌──────────────────────────────────────────────────┐
-│                  /plan COMMAND                   │
-│                                                  │
-│          ┌─────────────┬─────────────┐           │
-│          ▼             ▼             │           │
-│    ┌───────────┐ ┌───────────┐       │           │
-│    │code-scout │ │ doc-scout │  (parallel)       │
-│    └─────┬─────┘ └─────┬─────┘       │           │
-│          │             │             │           │
-│          └──────┬──────┘             │           │
-│                 ▼                    │           │
-│          ┌───────────┐               │           │
-│          │  PLANNER  │               │           │
-│          │(pluggable)│               │           │
-│          └─────┬─────┘               │           │
-│                │                     │           │
-│                ▼                     │           │
-│       IMPLEMENTATION PLAN            │           │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                            /plan COMMAND                                │
+│                                                                         │
+│        task: "Add logout button" | research: "Session handling"         │
+│                                    │                                    │
+│                    ┌───────────────┴───────────────┐                    │
+│                    ▼                               ▼                    │
+│              ┌───────────┐                   ┌───────────┐              │
+│              │code-scout │                   │ doc-scout │              │
+│              │(codebase) │                   │(external) │              │
+│              └─────┬─────┘                   └─────┬─────┘              │
+│                    │         (parallel)           │                    │
+│                    └───────────────┬───────────────┘                    │
+│                                    ▼                                    │
+│                          ┌─────────────────┐                            │
+│                          │     PLANNER     │                            │
+│                          │   (pluggable)   │                            │
+│                          └────────┬────────┘                            │
+│                                   │                                     │
+│                                   ▼                                     │
+│                        IMPLEMENTATION PLAN                              │
+│                        (files + instructions)                           │
+└─────────────────────────────────────────────────────────────────────────┘
 
-┌──────────────────────────────────────────────────┐
-│                  /code COMMAND                   │
-│                                                  │
-│              Parse plan from input               │
-│                       │                          │
-│       ┌───────────────┼───────────────┐          │
-│       ▼               ▼               ▼          │
-│ ┌────────────┐ ┌────────────┐ ┌────────────┐     │
-│ │ plan-coder │ │ plan-coder │ │ plan-coder │     │
-│ │   file1    │ │   file2    │ │   file3    │     │
-│ └────────────┘ └────────────┘ └────────────┘     │
-│                   (parallel)                     │
-│                                                  │
-│                 RESULTS TABLE                    │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                            /code COMMAND                                │
+│                                                                         │
+│                   plan: [...] or chat_id: [...]                         │
+│                                    │                                    │
+│                              Parse input                                │
+│                                    │                                    │
+│                    ┌───────────────┼───────────────┐                    │
+│                    ▼               ▼               ▼                    │
+│              ┌──────────┐   ┌──────────┐   ┌──────────┐                 │
+│              │plan-coder│   │plan-coder│   │plan-coder│                 │
+│              │  file1   │   │  file2   │   │  file3   │                 │
+│              └────┬─────┘   └────┬─────┘   └────┬─────┘                 │
+│                   │    (parallel)│              │                       │
+│                   └──────────────┼──────────────┘                       │
+│                                  ▼                                      │
+│                           RESULTS TABLE                                 │
+│                    (file | status | summary)                            │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Characteristics:**
@@ -250,11 +258,13 @@ The key architectural difference is **how plans move from planner to coders**.
 | **Plan delivery** | In prompt | In prompt | Via `chat_id` fetch |
 | **Coders need MCP?** | No | No | Yes |
 | **Planning model** | Claude | gpt-5.2 | RepoPrompt context_builder |
-| **Resume mechanism** | Accumulated context | Limited | `chat_id` continuation |
+| **Resume mechanism** | Accumulated context | sessionId continuation | `chat_id` continuation |
 
 ---
 
-## Agent Architecture
+## Architecture
+
+### Agent Architecture
 
 All plugins share the **same four agent types**. Only the planner implementation differs.
 
@@ -273,6 +283,16 @@ All plugins share the **same four agent types**. Only the planner implementation
 | doc-scout | Research tools | Research tools | Research tools |
 | planner | Read, Glob, Grep, Bash | `context_builder` / `chat_send` | `mcp__codex-cli__codex` |
 | plan-coder | Read, Edit, Write, Bash | + `mcp__RepoPrompt__chats` | Read, Edit, Write, Bash |
+
+### Pipeline Agents
+
+Pipeline plugins use specialized planner agents:
+
+| Agent | Purpose |
+|-------|---------|
+| **planner-start** | Creates initial plan from discovery context |
+| **planner-continue** | Continues existing session with new task/context |
+| **planner-fetch** | (repoprompt only) Fetches existing plan by chat_id |
 
 ---
 
@@ -334,8 +354,8 @@ Or enable in `.claude/settings.local.json`:
 # With initial research
 /pair-pipeline:orchestrate command:start | task:Add OAuth2 | research:Google OAuth2 best practices
 
-# Resume with accumulated context
-/pair-pipeline:orchestrate command:start-resume | task:Add password reset
+# Continue session with new task
+/pair-pipeline:orchestrate command:continue | task:Add password reset
 ```
 
 ### Swarm Plugins (One-Shot)
@@ -410,7 +430,7 @@ Include `research:` when working with:
 When a plan-coder returns BLOCKED:
 1. Read the error details in the status
 2. Fix the underlying issue
-3. Re-run with `command:start-resume` (pipeline) or same plan (swarm)
+3. Re-run with `command:continue` (pipeline) or same plan (swarm)
 
 ---
 
@@ -421,18 +441,31 @@ When a plan-coder returns BLOCKED:
 ├── .claude-plugin/
 │   └── marketplace.json          # Plugin registry
 ├── pair-pipeline/                # Claude planning + Pipeline
+│   ├── agents/                   # code-scout, doc-scout, plan-coder, planners
+│   ├── commands/                 # orchestrate
+│   └── skills/                   # code-quality
 ├── pair-swarm/                   # Claude planning + Swarm
+│   ├── agents/                   # code-scout, doc-scout, plan-coder, planner
+│   ├── commands/                 # plan, code
+│   └── skills/                   # code-quality
 ├── repoprompt-pair-pipeline/     # RepoPrompt planning + Pipeline
+│   ├── agents/                   # scouts, plan-coder (MCP), planners
+│   ├── commands/                 # orchestrate
+│   └── skills/                   # code-quality, repoprompt-mcps
 ├── repoprompt-swarm/             # RepoPrompt planning + Swarm
+│   ├── agents/                   # scouts, plan-coder (MCP), planner
+│   ├── commands/                 # plan, code
+│   └── skills/                   # code-quality, repoprompt-mcps
 ├── codex-pair-pipeline/          # Codex planning + Pipeline
+│   ├── agents/                   # scouts, plan-coder, planners
+│   ├── commands/                 # orchestrate
+│   └── skills/                   # code-quality, codex-mcps
 ├── codex-swarm/                  # Codex planning + Swarm
+│   ├── agents/                   # scouts, plan-coder, planner
+│   ├── commands/                 # plan, code
+│   └── skills/                   # code-quality, codex-mcps
 └── README.md
 ```
-
-Each plugin contains:
-- `agents/` - Agent definitions (code-scout, doc-scout, planner, plan-coder)
-- `commands/` - Slash commands (orchestrate, plan, code)
-- `skills/` - Shared skills (code-quality)
 
 ---
 
@@ -466,6 +499,6 @@ Common causes:
 Solutions:
 - Add more research at checkpoints (pipeline)
 - Regenerate plan with more specific task/research (swarm)
-- Fix issues and use `command:start-resume`
+- Fix issues and use `command:continue`
 
 ---

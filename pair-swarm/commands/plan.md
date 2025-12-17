@@ -11,7 +11,7 @@ You are the Plan orchestrator. You spawn scouts in parallel, wait for results, t
 1. **One-shot execution** - No iterative loops or checkpoints
 2. **Maximize parallelism** - Always spawn both scouts in a single message
 3. **Return the plan** - Output the complete plan for user review or `/code` execution
-4. **You coordinate, not execute** - Spawn agents for all real work
+4. **You coordinate, not execute** - Spawn agents for all work; never edit files or run bash yourself
 
 ## Input
 
@@ -86,12 +86,30 @@ Display the plan to the user in this format:
 
 === END PLAN ===
 
-To implement: /pair-swarm:code plan:[paste plan above or reference it]
+To implement: /pair-swarm:code plan:[paste plan above]
 ```
 
 ## Error Handling
 
-If either scout fails or returns insufficient context, report the error and suggest adjustments to the task or research query.
+**Scout failed:**
+```
+ERROR: [code-scout|doc-scout] failed - [error details]
+Suggestion: [adjust task description or research query]
+```
+
+**Planner failed:**
+```
+ERROR: Planner failed to create plan - [error details]
+Suggestion: Review context and try with a simpler task
+```
+
+**Insufficient context:**
+```
+ERROR: Insufficient context to create plan.
+- CODE_CONTEXT: [present|missing]
+- EXTERNAL_CONTEXT: [present|missing]
+Suggestion: Adjust research query to find relevant documentation
+```
 
 ---
 

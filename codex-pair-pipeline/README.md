@@ -31,14 +31,14 @@ Iterative discovery with checkpoints. Best for complex features.
 
 **With `research:` provided:** code-scout + doc-scout (parallel) -> checkpoints -> Codex planning -> execution
 
-### command:start-resume - Continue with New Plan
+### command:continue - Continue with New Plan
 
 Discovery loop, then create a new plan (builds on previous context).
 
 ```bash
-/codex-pair-pipeline:orchestrate command:start-resume | task:Add password reset flow
-/codex-pair-pipeline:orchestrate command:start-resume | task:Add rate limiting to the new endpoints
-/codex-pair-pipeline:orchestrate command:start-resume | task:Add email verification | research:SendGrid API best practices
+/codex-pair-pipeline:orchestrate command:continue | task:Add password reset flow
+/codex-pair-pipeline:orchestrate command:continue | task:Add rate limiting to the new endpoints
+/codex-pair-pipeline:orchestrate command:continue | task:Add email verification | research:SendGrid API best practices
 ```
 
 **Flow:** code-scout -> checkpoints -> optional doc-scout -> Codex planning -> execution
@@ -57,7 +57,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 | Command | Discovery | Planning |
 |---------|-----------|----------|
 | `command:start` | Checkpoints + optional research | Codex (planner-start) |
-| `command:start-resume` | Checkpoints + optional research | Codex (planner-start-resume) |
+| `command:continue` | Checkpoints + optional research | Codex (planner-continue) |
 
 ## Architecture Diagram
 
@@ -67,7 +67,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
                                    ▼
                         ┌────────────────────┐
                         │  command:start or  │
-                        │  start-resume      │
+                        │  continue          │
                         └─────────┬──────────┘
                                   │
                                   ▼
@@ -114,9 +114,9 @@ The orchestrator spawns specialized agents via the `Task` tool:
 ┌─────────────────┐
 │  planner-start  │
 │       or        │
-│ planner-start-  │
-│      resume     │
+│ planner-continue│
 │ (Codex gpt-5.2) │
+│                 │
 └────────┬────────┘
          │
          │ FULL PLAN + file_lists
@@ -144,7 +144,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 
 **Key flows:**
 - `command:start` -> discovery -> planner-start -> plan-coder
-- `command:start-resume` -> discovery -> planner-start-resume -> plan-coder
+- `command:continue` -> discovery -> planner-continue -> plan-coder
 
 ## Agents
 
@@ -153,7 +153,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 | code-scout | Investigate codebase | Glob, Grep, Read, Bash | Raw CODE_CONTEXT + clarification |
 | doc-scout | Fetch external docs | Any research tools | Raw EXTERNAL_CONTEXT + clarification |
 | planner-start | Synthesize prompt, create plan via Codex | mcp__codex-cli__codex | Full plan + file lists |
-| planner-start-resume | Synthesize prompt, create new plan via Codex | mcp__codex-cli__codex | Full plan + file lists |
+| planner-continue | Synthesize prompt, create new plan via Codex | mcp__codex-cli__codex | Full plan + file lists |
 | plan-coder | Implement single file | Read, Edit, Write, Glob, Grep, Bash | status + verified |
 
 ## Plan Distribution
@@ -166,7 +166,7 @@ The tuannvm/codex-mcp-server is still required for planners to communicate with 
 
 **Choosing the right command:**
 - `command:start` - Explore unfamiliar code, want checkpoints
-- `command:start-resume` - Build on previous context with a new plan
+- `command:continue` - Build on previous context with a new plan
 
 **Getting good results:**
 - Be specific: "Add logout button that clears session and redirects to /login" not "Add logout"
@@ -175,7 +175,7 @@ The tuannvm/codex-mcp-server is still required for planners to communicate with 
 
 **When things go wrong:**
 - BLOCKED status includes error details - read them
-- Re-run with `command:start-resume` after fixing blockers
+- Re-run with `command:continue` after fixing blockers
 - Incomplete context? Add research at checkpoints
 
 ## See Also

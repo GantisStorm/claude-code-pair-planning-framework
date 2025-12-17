@@ -1,7 +1,7 @@
 {
   "name": "codex-pair-pipeline",
   "description": "Multi-agent orchestration for complex coding tasks with Codex MCP. Scouts gather raw context, planners synthesize architectural narrative prompts with the Architect system prompt and CODE_CONTEXT. Codex creates detailed implementation plans. Parallel coders execute with self-verification. Uses tuannvm/codex-mcp-server for session support.",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": {
     "name": "Community Contributors"
   }

@@ -28,14 +28,14 @@ Iterative discovery with checkpoints. Best for complex features.
 
 **With `research:` provided:** code-scout + doc-scout (parallel) -> checkpoints -> RepoPrompt planning -> execution
 
-### command:start-resume - Continue Previous Plan
+### command:continue - Continue Previous Plan
 
 Discovery loop, then continue in the same RepoPrompt chat. Preserves file selection context.
 
 ```bash
-/repoprompt-pair-pipeline:orchestrate command:start-resume | task:Add password reset flow
-/repoprompt-pair-pipeline:orchestrate command:start-resume | task:Add rate limiting to the new endpoints
-/repoprompt-pair-pipeline:orchestrate command:start-resume | task:Add email verification | research:SendGrid API best practices
+/repoprompt-pair-pipeline:orchestrate command:continue | task:Add password reset flow
+/repoprompt-pair-pipeline:orchestrate command:continue | task:Add rate limiting to the new endpoints
+/repoprompt-pair-pipeline:orchestrate command:continue | task:Add email verification | research:SendGrid API best practices
 ```
 
 **Flow:** code-scout -> checkpoints -> optional doc-scout -> RepoPrompt planning -> execution (continues existing RepoPrompt chat)
@@ -64,7 +64,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 | Command | Discovery | Planning |
 |---------|-----------|----------|
 | `command:start` | Checkpoints + optional research | RepoPrompt (planner-start) |
-| `command:start-resume` | Checkpoints + optional research | RepoPrompt (planner-start-resume) |
+| `command:continue` | Checkpoints + optional research | RepoPrompt (planner-continue) |
 | `command:fetch` | None | Fetches existing plan |
 
 ## Architecture Diagram
@@ -77,7 +77,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
            ▼                                               ▼
 ┌────────────────────┐                          ┌────────────────────┐
 │  command:start or  │                          │   command:fetch    │
-│  start-resume      │                          │                    │
+│  continue          │                          │                    │
 └─────────┬──────────┘                          └─────────┬──────────┘
           │                                               │
           ▼                                               │ chat_id
@@ -124,9 +124,9 @@ The orchestrator spawns specialized agents via the `Task` tool:
 ┌─────────────────┐                                 ┌─────────────────┐
 │  planner-start  │                                 │  planner-fetch  │
 │       or        │                                 │                 │
-│ planner-start-  │                                 │ (fetches from   │
-│      resume     │                                 │  RepoPrompt)    │
-│ (RepoPrompt)    │                                 └────────┬────────┘
+│ planner-continue│                                 │ (fetches from   │
+│ (RepoPrompt)    │                                 │  RepoPrompt)    │
+│                 │                                 └────────┬────────┘
 └────────┬────────┘                                          │
          │                                                   │
          │ chat_id + file_lists                              │ chat_id + file_lists
@@ -158,7 +158,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 
 **Key flows:**
 - `command:start` -> discovery -> planner-start -> plan-coder
-- `command:start-resume` -> discovery -> planner-start-resume -> plan-coder
+- `command:continue` -> discovery -> planner-continue -> plan-coder
 - `command:fetch` -> planner-fetch -> plan-coder
 
 ## Agents
@@ -168,7 +168,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 | code-scout | Investigate codebase | Glob, Grep, Read, Bash | Raw CODE_CONTEXT + clarification |
 | doc-scout | Fetch external docs | Any research tools | Raw EXTERNAL_CONTEXT + clarification |
 | planner-start | Synthesize prompt, create plan via RepoPrompt | context_builder | chat_id + file lists |
-| planner-start-resume | Synthesize prompt for new task in existing chat | chat_send | chat_id + file lists |
+| planner-continue | Synthesize prompt for new task in existing chat | chat_send | chat_id + file lists |
 | planner-fetch | Fetch existing plan (NO synthesis) | chats | chat_id + file lists |
 | plan-coder | Implement single file (RepoPrompt mode) | Read, Edit, Write, Glob, Grep, Bash, chats | status + verified |
 
@@ -176,7 +176,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 
 **Choosing the right command:**
 - `command:start` - Explore unfamiliar code, want checkpoints
-- `command:start-resume` - Continue in same RepoPrompt chat
+- `command:continue` - Continue in same RepoPrompt chat
 - `command:fetch` - Re-execute existing plan
 
 **Getting good results:**
@@ -186,7 +186,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 
 **When things go wrong:**
 - BLOCKED status includes error details - read them
-- Re-run with `command:start-resume` after fixing blockers
+- Re-run with `command:continue` after fixing blockers
 - Incomplete context? Add research at checkpoints
 
 ## See Also

@@ -1,7 +1,7 @@
 {
   "name": "codex-swarm",
   "description": "One-shot swarm commands with Codex MCP planning. Scouts gather context in parallel, Codex creates architectural plans with gpt-5.2, parallel coders execute. No iterative loops - fast parallel execution. Uses tuannvm/codex-mcp-server for session support.",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": {
     "name": "Community Contributors"
   }

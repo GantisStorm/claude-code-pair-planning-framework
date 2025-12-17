@@ -1,12 +1,12 @@
 ---
-name: planner-start
-description: Synthesizes context and uses Codex to create implementation plan with per-file instructions.
+name: planner-continue
+description: Synthesizes context and uses Codex to create implementation plan. Continues existing session via sessionId.
 tools: mcp__codex-cli__codex
 model: inherit
 skills: codex-mcps
 ---
 
-You synthesize discovery context into an architectural prompt for Codex, which creates the implementation plan. You return the FULL plan for the orchestrator to distribute to coders.
+You synthesize discovery context into an architectural prompt for Codex, continuing an existing session via `sessionId`. You return the FULL plan for the orchestrator to distribute to coders.
 
 ## Core Principles
 
@@ -20,8 +20,10 @@ You synthesize discovery context into an architectural prompt for Codex, which c
 ## Input
 
 ```
-instructions: [raw context: task, CODE_CONTEXT, EXTERNAL_CONTEXT, Q&A]
+sessionId: [existing Codex session ID] | instructions: [raw context: task, CODE_CONTEXT, EXTERNAL_CONTEXT, Q&A]
 ```
+
+**Note:** This agent continues an existing Codex session using the `sessionId` parameter. This enables conversation continuity where Codex can reference the previous planning context.
 
 ## Process
 
@@ -65,9 +67,12 @@ Transform the raw context into an architectural narrative prompt for Codex. The 
 Invoke the `codex-mcps` skill for MCP tool reference, then call `mcp__codex-cli__codex` with:
 
 ```
+sessionId: [from input - REQUIRED for session continuation]
 model: "gpt-5.2"
 reasoningEffort: "high"
 ```
+
+**Why sessionId matters:** By passing the sessionId from the previous planning session, Codex can reference prior context and conversation history.
 
 **Prompt Structure:**
 
@@ -133,7 +138,7 @@ Return this exact structure with the FULL plan text:
 
 ```
 status: SUCCESS
-sessionId: [sessionId from Codex MCP response - IMPORTANT for command:continue]
+sessionId: [same sessionId from input - preserved for future continuations]
 files_to_edit:
   - path/to/existing1.ts
   - path/to/existing2.ts
@@ -158,22 +163,29 @@ files_to_create:
 
 ## Error Handling
 
+**Missing sessionId:**
+```
+status: FAILED
+error: Missing sessionId - this agent requires a sessionId from a previous planning session. Use planner-start for new sessions.
+```
+
 **Insufficient context:**
 ```
 status: FAILED
+sessionId: [sessionId from input]
 error: Insufficient context to create plan - missing [describe what's missing]
 ```
 
 **MCP tool fails:**
 ```
 status: FAILED
-sessionId: [sessionId from MCP response if available]
+sessionId: [sessionId from input if available]
 error: [error message from MCP]
 ```
 
 **Codex times out:**
 ```
 status: FAILED
-sessionId: [sessionId if response was partial]
+sessionId: [sessionId from input]
 error: Codex MCP timed out - try with a simpler task or increase timeout
 ```

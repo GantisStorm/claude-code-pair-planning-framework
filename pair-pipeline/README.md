@@ -28,13 +28,13 @@ Iterative discovery with checkpoints. Best for complex features.
 
 **With `research:` provided:** code-scout + doc-scout (parallel) -> checkpoints -> planning -> execution
 
-### command:start-resume - Continue Previous Context
+### command:continue - Continue Previous Context
 
 Discovery loop using accumulated context from previous run.
 
 ```bash
-/pair-pipeline:orchestrate command:start-resume | task:Add password reset flow
-/pair-pipeline:orchestrate command:start-resume | task:Add rate limiting | research:Express rate limiting
+/pair-pipeline:orchestrate command:continue | task:Add password reset flow
+/pair-pipeline:orchestrate command:continue | task:Add rate limiting | research:Express rate limiting
 ```
 
 **Flow:** code-scout (if needed) -> checkpoints -> optional doc-scout -> planning -> execution (uses accumulated context)
@@ -50,7 +50,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 3. **Planning** - planner-start creates implementation plan with per-file instructions
 4. **Execution** - plan-coders implement in parallel, verify with code-quality skill
 
-**Flow:** code-scout -> checkpoints -> optional doc-scout -> planner-start (or planner-start-resume) -> plan-coder -> review
+**Flow:** code-scout -> checkpoints -> optional doc-scout -> planner-start (or planner-continue) -> plan-coder -> review
 
 ## Architecture Diagram
 
@@ -60,7 +60,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
                                    ▼
                         ┌────────────────────┐
                         │  command:start or  │
-                        │  start-resume      │
+                        │  continue          │
                         └─────────┬──────────┘
                                   │
                                   ▼
@@ -107,8 +107,8 @@ The orchestrator spawns specialized agents via the `Task` tool:
 ┌─────────────────┐
 │  planner-start  │
 │       or        │
-│ planner-start-  │
-│      resume     │
+│ planner-continue│
+│                 │
 └────────┬────────┘
          │
          │ file_lists + per-file plan
@@ -141,7 +141,7 @@ The orchestrator spawns specialized agents via the `Task` tool:
 | code-scout | Investigate codebase | Glob, Grep, Read, Bash | Raw CODE_CONTEXT + clarification |
 | doc-scout | Fetch external docs | Any research tools | Raw EXTERNAL_CONTEXT + clarification |
 | planner-start | Create implementation plan (new task) | Read, Glob, Grep, Bash | file lists + instructions |
-| planner-start-resume | Create implementation plan (resume mode) | Read, Glob, Grep, Bash | file lists + instructions |
+| planner-continue | Create implementation plan (continue mode) | Read, Glob, Grep, Bash | file lists + instructions |
 | plan-coder | Implement single file | Read, Edit, Write, Glob, Grep, Bash | status + verified |
 
 ## Tips
@@ -151,14 +151,14 @@ The orchestrator spawns specialized agents via the `Task` tool:
 - For bugs, describe symptoms: "Login button doesn't respond on mobile Safari" not "Login broken"
 - Use `research:` for external APIs
 
-**Using command:start-resume:**
-- Use `command:start-resume` when adding related features to the same area of code
+**Using command:continue:**
+- Use `command:continue` when adding related features to the same area of code
 - The accumulated context (CODE_CONTEXT, EXTERNAL_CONTEXT, Q&A) is preserved
-- You can add new research with `command:start-resume | task:... | research:...`
+- You can add new research with `command:continue | task:... | research:...`
 
 **When things go wrong:**
 - BLOCKED status includes error details - read them
-- Re-run with `command:start-resume` after fixing blockers
+- Re-run with `command:continue` after fixing blockers
 - Incomplete context? Add research at checkpoints
 
 ## Comparison with repoprompt-pair-pipeline

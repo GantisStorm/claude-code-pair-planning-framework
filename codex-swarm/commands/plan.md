@@ -1,5 +1,5 @@
 ---
-description: One-shot parallel planning with Codex - scouts gather context, Codex creates implementation plan with gpt-5.2
+description: One-shot parallel planning with Codex - scouts gather context, Codex creates implementation plan
 argument-hint: task: | research:
 allowed-tools: Task
 ---
@@ -10,8 +10,8 @@ You are the Plan orchestrator. You spawn scouts in parallel, wait for results, t
 
 1. **One-shot execution** - No iterative loops or checkpoints
 2. **Maximize parallelism** - Always spawn both scouts in a single message
-3. **Return the full plan** - Output the complete plan for `/code` execution
-4. **You coordinate, not execute** - Spawn agents for all real work
+3. **Return the full plan** - Output the complete plan for `/code` execution (coders need embedded instructions)
+4. **You coordinate, not execute** - Spawn agents for all work; never edit files or run bash yourself
 
 ## Input
 
@@ -49,18 +49,18 @@ Wait for both agents to complete. Collect:
 
 ### Step 3: Spawn Planner
 
-Pass the collected context to the planner (which uses Codex with gpt-5.2 and high reasoning effort):
+Pass the collected context to the planner (which uses Codex MCP):
 
 ```
 Task codex-swarm:planner
   prompt: "task: [task description] | code_context: [CODE_CONTEXT from scout] | external_context: [EXTERNAL_CONTEXT from scout]"
 ```
 
-The planner synthesizes the context into an architectural narrative prompt and sends it to Codex with the Architect system prompt, which creates the detailed plan.
+The planner synthesizes the context into an architectural narrative prompt and sends it to Codex with the Architect system prompt.
 
-### Step 4: Return Plan Info
+### Step 4: Return Plan
 
-Display the plan info and full plan to the user in this format:
+Display the plan to the user in this format:
 
 ```
 === CODEX PLAN CREATED ===
@@ -75,23 +75,51 @@ Display the plan info and full plan to the user in this format:
 ## Files to Create
 - [newfile.ts]
 
-## Implementation Plan
+## Plan Details
 
-[FULL PLAN TEXT FROM PLANNER - include all per-file instructions]
+### [file1.ts] [edit]
+[implementation instructions]
 
-=== END PLAN INFO ===
+### [file2.ts] [edit]
+[implementation instructions]
 
-To implement this plan, copy the Implementation Plan section above and run:
-/codex-swarm:code plan:[paste plan here]
+### [newfile.ts] [create]
+[implementation instructions]
+
+=== END PLAN ===
+
+To implement: /codex-swarm:code plan:[paste plan above]
 ```
 
-**IMPORTANT**: The full plan text must be displayed so the user can pass it to `/codex-swarm:code`. We cannot fetch plans from Codex sessions.
+**IMPORTANT**: The full plan text must be displayed so the user can pass it to `/codex-swarm:code`. Coders cannot fetch plans from Codex sessions.
 
 ## Error Handling
 
-If either scout fails or returns insufficient context, report the error and suggest adjustments to the task or research query.
+**Scout failed:**
+```
+ERROR: [code-scout|doc-scout] failed - [error details]
+Suggestion: [adjust task description or research query]
+```
 
-If the planner fails (Codex MCP error), report the error and suggest checking Codex configuration with `claude mcp list`.
+**Planner failed:**
+```
+ERROR: Planner failed to create plan - [error details]
+Suggestion: Check Codex MCP configuration with `claude mcp list`
+```
+
+**Codex MCP error:**
+```
+ERROR: Codex MCP call failed - [error details]
+Suggestion: Verify Codex CLI is installed and MCP server is running
+```
+
+**Insufficient context:**
+```
+ERROR: Insufficient context to create plan.
+- CODE_CONTEXT: [present|missing]
+- EXTERNAL_CONTEXT: [present|missing]
+Suggestion: Adjust research query to find relevant documentation
+```
 
 ---
 
