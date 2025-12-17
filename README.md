@@ -111,7 +111,7 @@ The framework offers **two execution patterns** that work with any planning engi
 │              │code-scout │                   │ doc-scout │              │
 │              │(codebase) │                   │(external) │              │
 │              └─────┬─────┘                   └─────┬─────┘              │
-│                    │         (parallel)           │                    │
+│                    │           (parallel)          │                    │
 │                    └───────────────┬───────────────┘                    │
 │                                    ▼                                    │
 │                          ┌─────────────────┐                            │
