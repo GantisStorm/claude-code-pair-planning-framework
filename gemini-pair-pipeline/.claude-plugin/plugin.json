@@ -1,7 +1,7 @@
 {
   "name": "gemini-pair-pipeline",
   "description": "Multi-agent orchestration for complex coding tasks with Gemini MCP (jamubc/gemini-mcp-tool). Scouts gather raw context, planners synthesize XML architectural instructions for gemini-3-flash-preview. Returns full plan with per-file instructions. Iterative discovery with user checkpoints and parallel execution. Orchestrator manages all context (Gemini is fully one-shot).",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Community Contributors"
   }
