@@ -4,57 +4,57 @@
     "name": "GantisStorm"
   },
   "metadata": {
-    "description": "Claude Code plugin collection with RepoPrompt and Codex integrations",
-    "version": "1.8.0"
+    "description": "Claude Code plugin collection with RepoPrompt, Codex CLI, and Gemini CLI integrations",
+    "version": "1.9.0"
   },
   "plugins": [
     {
       "name": "repoprompt-pair-pipeline",
       "source": "./repoprompt-pair-pipeline",
       "description": "Multi-agent orchestration for complex coding tasks with RepoPrompt. Scouts gather raw context, planners synthesize XML architectural instructions with structured sections: task, architecture, selected_context, relationships, implementation_notes, ambiguities. RepoPrompt creates detailed plans with minimal ambiguity. Parallel coders execute with self-verification.",
-      "version": "1.4.0"
+      "version": "1.5.0"
     },
     {
       "name": "pair-pipeline",
       "source": "./pair-pipeline",
       "description": "Multi-agent orchestration for complex coding tasks without MCP. Scouts gather raw context, planner synthesizes structured narrative (task, architecture, context, relationships, implementation notes, ambiguities) into per-file instructions. Full discovery loop with user checkpoints and parallel execution.",
-      "version": "1.4.0"
+      "version": "1.5.0"
     },
     {
       "name": "pair-swarm",
       "source": "./pair-swarm",
       "description": "One-shot swarm commands for planning and coding. Scouts gather context in parallel, planner synthesizes structured narrative (task, architecture, context, relationships, implementation notes), parallel coders execute. No iterative loops - fast parallel execution.",
-      "version": "1.3.0"
+      "version": "1.4.0"
     },
     {
       "name": "repoprompt-swarm",
       "source": "./repoprompt-swarm",
       "description": "One-shot swarm commands with RepoPrompt planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for RepoPrompt, parallel coders execute. No iterative loops - fast parallel execution.",
-      "version": "1.4.0"
+      "version": "1.5.0"
     },
     {
       "name": "codex-pair-pipeline",
       "source": "./codex-pair-pipeline",
-      "description": "Multi-agent orchestration for complex coding tasks with Codex MCP (tuannvm/codex-mcp-server). Scouts gather raw context, planners synthesize XML architectural instructions for gpt-5.2. Returns full plan with per-file instructions. Iterative discovery with user checkpoints and parallel execution. Session continuation via sessionId for command:continue.",
-      "version": "1.7.0"
+      "description": "Multi-agent orchestration for complex coding tasks with Codex CLI (gpt-5.2). Scouts gather raw context, planners synthesize XML architectural instructions. Returns full plan with per-file instructions. Iterative discovery with user checkpoints and parallel execution. Session continuation via codex resume.",
+      "version": "1.8.0"
     },
     {
       "name": "codex-swarm",
       "source": "./codex-swarm",
-      "description": "One-shot swarm commands with Codex MCP planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for Codex (gpt-5.2), parallel coders execute. No iterative loops - fast parallel execution.",
-      "version": "1.6.0"
+      "description": "One-shot swarm commands with Codex CLI planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for Codex (gpt-5.2), parallel coders execute. No iterative loops - fast parallel execution.",
+      "version": "1.7.0"
     },
     {
       "name": "gemini-pair-pipeline",
       "source": "./gemini-pair-pipeline",
-      "description": "Multi-agent orchestration for complex coding tasks with Gemini MCP (jamubc/gemini-mcp-tool). Scouts gather raw context, planners synthesize XML architectural instructions for gemini-3-flash-preview. Returns full plan with per-file instructions. Iterative discovery with user checkpoints and parallel execution. Orchestrator manages all context (Gemini is fully one-shot).",
-      "version": "1.0.0"
+      "description": "Multi-agent orchestration for complex coding tasks with Gemini CLI (gemini-3-flash-preview). Scouts gather raw context, planners synthesize XML architectural instructions. Returns full plan with per-file instructions. Iterative discovery with user checkpoints and parallel execution. Session continuation via -r flag.",
+      "version": "1.1.0"
     },
     {
       "name": "gemini-swarm",
       "source": "./gemini-swarm",
-      "description": "One-shot swarm commands with Gemini MCP planning (jamubc/gemini-mcp-tool). Scouts gather context in parallel, planner synthesizes XML architectural instructions for Gemini (gemini-3-flash-preview), parallel coders execute. No iterative loops - fast parallel execution. Gemini is fully one-shot with no session history.",
-      "version": "1.0.0"
+      "description": "One-shot swarm commands with Gemini CLI planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for Gemini (gemini-3-flash-preview), parallel coders execute. No iterative loops - fast parallel execution.",
+      "version": "1.1.0"
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "name": "codex-pair-pipeline",
   "description": "Multi-agent orchestration for complex coding tasks with Codex MCP. Scouts gather raw context, planners synthesize XML architectural instructions with structured sections: task, architecture, selected_context, relationships, implementation_notes, ambiguities. Codex (gpt-5.2) creates detailed implementation plans. Parallel coders execute with self-verification.",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "author": {
     "name": "Community Contributors"
   }
