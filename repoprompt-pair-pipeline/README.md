@@ -131,7 +131,7 @@ The orchestrator spawns specialized agents via the `Task` tool with `run_in_back
 │                 │             │                 │                        │
 │ Creates new     │             │ Evaluates       │                        │
 │ RepoPrompt chat │             │ workspace       │                        │
-│ via context_    │             │ selection,      │                        │
+│ via rp-cli      │             │ selection,      │                        │
 │ builder         │             │ adjusts files   │                        │
 └────────┬────────┘             └────────┬────────┘                        │
          │                               │                                 │
@@ -168,7 +168,7 @@ The orchestrator spawns specialized agents via the `Task` tool with `run_in_back
                         │  │ground: true │ │ground: true │ │ground: true │     │
                         │  │             │ │             │ │             │     │
                         │  │ Fetches plan│ │ Fetches plan│ │ Fetches plan│     │
-                        │  │ via MCP     │ │ via MCP     │ │ via MCP     │     │
+                        │  │ via rp-cli  │ │ via rp-cli  │ │ via rp-cli  │     │
                         │  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘     │
                         │         │               │               │             │
                         │         └───────────────┼───────────────┘             │
@@ -229,7 +229,7 @@ The orchestrator spawns specialized agents via the `Task` tool with `run_in_back
 | Feature | repoprompt-pair-pipeline | codex-pair-pipeline | repoprompt-swarm |
 |---------|--------------------------|---------------------|------------------|
 | Execution | Iterative with checkpoints | Iterative with checkpoints | One-shot |
-| Planning | RepoPrompt MCP | Codex MCP (gpt-5.2) | RepoPrompt MCP |
+| Planning | RepoPrompt (rp-cli) | Codex CLI (gpt-5.2) | RepoPrompt (rp-cli) |
 | User control | Checkpoints during discovery | Checkpoints during discovery | Review plan, then execute |
 | Commands | /orchestrate (all-in-one) | /orchestrate (all-in-one) | /plan + /code (separate) |
 | Use case | Exploratory tasks with RepoPrompt | Exploratory tasks with Codex | Well-defined tasks |
@@ -243,10 +243,10 @@ Use **repoprompt-swarm** when you know what you want and just need fast parallel
 
 ## See Also
 
-For a simpler pipeline without RepoPrompt dependency, see **pair-pipeline** which uses full discovery with checkpoints but direct planning (no MCP required).
+For a simpler pipeline without RepoPrompt dependency, see **pair-pipeline** which uses full discovery with checkpoints but direct planning (no external CLI required).
 
 ## Requirements
 
-- **RepoPrompt** - Required (with MCP Server enabled in settings)
+- **RepoPrompt** - Required (running in background)
 - **rp-cli** - Install via RepoPrompt Settings → MCP Server → "Install CLI to PATH"
 - **Claude Code** - Orchestration, discovery, and execution

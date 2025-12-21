@@ -38,7 +38,7 @@ A **pluggable multi-agent planning framework** for Claude Code. Swap planning en
 
 **The framework provides:**
 - **Shared agents**: code-scout, doc-scout, plan-coder (same implementation across plugins)
-- **Pluggable planners**: Swap between Claude, RepoPrompt MCP, Codex CLI, or Gemini CLI
+- **Pluggable planners**: Swap between Claude, RepoPrompt (rp-cli), Codex CLI, or Gemini CLI
 - **Two execution patterns**: Pipeline (iterative) or Swarm (one-shot)
 
 ---
@@ -202,17 +202,17 @@ The key architectural difference is **how plans move from planner to coders**.
 
 ---
 
-#### MCP Plan Storage & Fetch (repoprompt-*)
+#### CLI Plan Storage & Fetch (repoprompt-*)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                             ORCHESTRATOR                                │
 │                                                                         │
 │  ┌───────────┐         ┌─────────────────────────────────────────────┐  │
-│  │  PLANNER  │────────►│              RepoPrompt MCP                 │  │
+│  │  PLANNER  │────────►│              RepoPrompt (rp-cli)            │  │
 │  │           │         │  ┌───────────────────────────────────────┐  │  │
 │  │   calls   │         │  │     PLAN STORED IN CHAT SESSION       │  │  │
-│  │ context_  │         │  │         chat_id: abc123               │  │  │
+│  │ rp-cli    │         │  │         chat_id: abc123               │  │  │
 │  │  builder  │         │  └───────────────────────────────────────┘  │  │
 │  └───────────┘         └──────────────────────┬──────────────────────┘  │
 │        │                                      │                         │
@@ -233,22 +233,22 @@ The key architectural difference is **how plans move from planner to coders**.
 │  │ target: file1   │                 │ target: file2   │                │
 │  │                 │                 │                 │                │
 │  │  FETCHES plan   │                 │  FETCHES plan   │                │
-│  │  via mcp__Repo  │                 │  via mcp__Repo  │                │
-│  │  Prompt__chats  │                 │  Prompt__chats  │                │
+│  │  via rp-cli     │                 │  via rp-cli     │                │
+│  │  chats log      │                 │  chats log      │                │
 │  └────────┬────────┘                 └────────┬────────┘                │
 │           │                                   │                         │
 │           ▼                                   ▼                         │
 │  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                        RepoPrompt MCP                             │  │
+│  │                        RepoPrompt (rp-cli)                        │  │
 │  │           (each coder fetches from same chat_id)                  │  │
 │  └───────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 **How it works:**
-1. Planner stores plan in RepoPrompt, returns `chat_id`
+1. Planner stores plan in RepoPrompt via `rp-cli builder`, returns `chat_id`
 2. Orchestrator only receives `chat_id` + file lists
-3. Each plan-coder **fetches** its instructions from RepoPrompt MCP
+3. Each plan-coder **fetches** its instructions via `rp-cli chats log`
 4. Plan persists for review/resumption
 
 **Used by:** repoprompt-*
@@ -259,10 +259,10 @@ The key architectural difference is **how plans move from planner to coders**.
 
 | Aspect | pair-* (Claude) | codex-* (Codex) | repoprompt-* (RepoPrompt) | gemini-* (Gemini) |
 |--------|-----------------|-----------------|---------------------------|-------------------|
-| **Plan storage** | Orchestrator memory | Orchestrator memory | RepoPrompt MCP | Orchestrator memory |
+| **Plan storage** | Orchestrator memory | Orchestrator memory | RepoPrompt (rp-cli) | Orchestrator memory |
 | **Plan delivery** | In prompt | In prompt | Via `chat_id` fetch | In prompt |
-| **Coders need MCP?** | No | No | Yes | No |
-| **Planning model** | Claude | gpt-5.2 (via CLI) | RepoPrompt context_builder | gemini-3-flash-preview (via CLI) |
+| **External CLI** | None | codex | rp-cli | gemini |
+| **Planning model** | Claude | gpt-5.2 (via CLI) | RepoPrompt builder | gemini-3-flash-preview (via CLI) |
 | **Session continuation** | Accumulated context | Session ID | `chat_id` | Session index |
 
 ---
@@ -285,7 +285,7 @@ All four planning engines implement the **same meta framework**. This is what ma
 │   │  • Input format: task: | research: | mode:                          │   │
 │   │  • Output format: files_to_edit, files_to_create, per-file instrs   │   │
 │   │                                                                     │   │
-│   │  *repoprompt plan-coder adds MCP fetch capability                   │   │
+│   │  *repoprompt plan-coder adds rp-cli fetch capability                │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
@@ -293,8 +293,8 @@ All four planning engines implement the **same meta framework**. This is what ma
 │   │                                                                     │   │
 │   │  • Planner implementation (how context → plan)                      │   │
 │   │  • Plan format (Narrative vs XML)                                   │   │
-│   │  • Plan delivery (direct vs MCP fetch)                              │   │
-│   │  • External dependencies (none vs CLI vs MCP)                       │   │
+│   │  • Plan delivery (direct vs CLI fetch)                              │   │
+│   │  • External dependencies (none vs CLI)                              │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -315,7 +315,7 @@ All four planning engines implement the **same meta framework**. This is what ma
 /plugin install pair-pipeline@claude-code-repoprompt-codex-plugins
 /plugin install pair-swarm@claude-code-repoprompt-codex-plugins
 
-# RepoPrompt planning (requires MCP)
+# RepoPrompt planning (requires rp-cli)
 /plugin install repoprompt-pair-pipeline@claude-code-repoprompt-codex-plugins
 /plugin install repoprompt-swarm@claude-code-repoprompt-codex-plugins
 
@@ -401,9 +401,19 @@ Or enable in `.claude/settings.local.json`:
 | Planning Engine | Requirement | Setup |
 |-----------------|-------------|-------|
 | pair-* (Claude) | None | No additional setup |
-| repoprompt-* | RepoPrompt MCP | [RepoPrompt App](https://repoprompt.com) |
+| repoprompt-* | rp-cli | See below |
 | codex-* | Codex CLI | See below |
 | gemini-* | Gemini CLI | See below |
+
+#### rp-cli Setup
+
+```bash
+# Install rp-cli via RepoPrompt
+# RepoPrompt Settings → MCP Server → "Install CLI to PATH"
+
+# Verify
+rp-cli --version
+```
 
 #### Codex CLI Setup
 
@@ -447,13 +457,13 @@ gemini --version
 │   ├── commands/                 # plan, code
 │   └── skills/                   # code-quality
 ├── repoprompt-pair-pipeline/     # RepoPrompt planning + Pipeline
-│   ├── agents/                   # scouts, plan-coder (MCP), planners, planner-context
+│   ├── agents/                   # scouts, plan-coder (rp-cli), planners, planner-context
 │   ├── commands/                 # orchestrate
-│   └── skills/                   # code-quality, repoprompt-mcps
+│   └── skills/                   # code-quality, rp-cli
 ├── repoprompt-swarm/             # RepoPrompt planning + Swarm
-│   ├── agents/                   # scouts, plan-coder (MCP), planner
+│   ├── agents/                   # scouts, plan-coder (rp-cli), planner
 │   ├── commands/                 # plan, code
-│   └── skills/                   # code-quality, repoprompt-mcps
+│   └── skills/                   # code-quality, rp-cli
 ├── codex-pair-pipeline/          # Codex planning + Pipeline
 │   ├── agents/                   # scouts, plan-coder, planners
 │   ├── commands/                 # orchestrate

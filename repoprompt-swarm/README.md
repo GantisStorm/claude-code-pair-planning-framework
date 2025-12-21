@@ -126,19 +126,19 @@ Agents use rp-cli commands via Bash for both planning (`builder`) and plan retri
 | Feature | repoprompt-swarm | pair-swarm | repoprompt-pair-pipeline |
 |---------|------------------|------------|--------------------------|
 | Execution | One-shot | One-shot | Iterative with checkpoints |
-| Planning | RepoPrompt MCP | Direct (no MCP) | RepoPrompt MCP |
+| Planning | RepoPrompt (rp-cli) | Direct (no CLI) | RepoPrompt (rp-cli) |
 | User control | Review plan, then execute | Review plan, then execute | Checkpoints during discovery |
 | Commands | /plan + /code (separate) | /plan + /code (separate) | /orchestrate (all-in-one) |
-| Use case | Well-defined tasks with RepoPrompt | Well-defined tasks, no MCP | Exploratory tasks |
+| Use case | Well-defined tasks with RepoPrompt | Well-defined tasks, no CLI | Exploratory tasks |
 
 Use **repoprompt-swarm** when you know what you want and want RepoPrompt's intelligent planning.
 
-Use **pair-swarm** when you don't need RepoPrompt (no MCP dependency).
+Use **pair-swarm** when you don't need RepoPrompt (no external CLI dependency).
 
 Use **repoprompt-pair-pipeline** when you need iterative discovery with user checkpoints.
 
 ## Requirements
 
-- **RepoPrompt** - Required (with MCP Server enabled in settings)
+- **RepoPrompt** - Required (running in background)
 - **rp-cli** - Install via RepoPrompt Settings → MCP Server → "Install CLI to PATH"
 - **Claude Code** - Orchestration and execution
