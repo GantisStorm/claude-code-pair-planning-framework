@@ -10,7 +10,7 @@ Quick reference for Codex CLI commands.
 ## Basic Command
 
 ```bash
-codex exec "[prompt]" -m gpt-5.2-codex --reasoning-effort high --sandbox read-only --ask-for-approval never 2>&1
+codex exec "[prompt]" -m gpt-5.2 --reasoning-effort high --sandbox read-only --ask-for-approval never 2>&1
 ```
 
 ## Common Flags
@@ -18,7 +18,7 @@ codex exec "[prompt]" -m gpt-5.2-codex --reasoning-effort high --sandbox read-on
 | Flag | Purpose |
 |------|---------|
 | `exec` | Non-interactive execution mode |
-| `-m gpt-5.2-codex` | Model selection |
+| `-m gpt-5.2` | Model selection |
 | `--reasoning-effort high` | Reasoning effort (minimal, low, medium, high, xhigh) |
 | `--sandbox read-only` | Prevent file modifications |
 | `--sandbox workspace-write` | Allow writes within workspace |

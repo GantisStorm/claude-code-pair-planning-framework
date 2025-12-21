@@ -1,9 +1,9 @@
 ---
 name: planner
 description: Synthesizes context into XML architectural instructions for RepoPrompt. Returns chat_id for coders.
-tools: mcp__RepoPrompt__context_builder
+tools: Bash
 model: inherit
-skills: repoprompt-mcps
+skills: rp-cli
 ---
 
 You synthesize discovery context into structured XML architectural instructions for RepoPrompt, which creates the implementation plan. You return the `chat_id` for coders to fetch their instructions.
@@ -112,11 +112,15 @@ Transform the raw context into structured XML architectural instructions. The in
 | `<requirements>` | Task + Q&A | Acceptance criteria for completion |
 | `<constraints>` | Task + EXTERNAL_CONTEXT | Hard technical constraints |
 
-### Step 3: Call RepoPrompt MCP
+### Step 3: Call RepoPrompt via rp-cli
 
-Invoke the `repoprompt-mcps` skill for MCP tool reference, then call `mcp__RepoPrompt__context_builder` with:
-- `instructions`: your XML architectural instructions
-- `response_type`: "plan"
+Invoke the `rp-cli` skill for command reference, then use Bash to call:
+
+```bash
+rp-cli -e 'builder "YOUR_XML_INSTRUCTIONS" --response-type plan'
+```
+
+**Important**: Escape any single quotes in your instructions by replacing `'` with `'\''`.
 
 RepoPrompt creates a detailed architectural plan from your instructions.
 
@@ -157,9 +161,9 @@ status: FAILED
 error: Ambiguous requirements - [describe the ambiguity that prevents planning]
 ```
 
-**MCP tool fails:**
+**rp-cli command fails:**
 ```
 status: FAILED
 chat_id: none
-error: [error message from MCP]
+error: [error message from rp-cli]
 ```

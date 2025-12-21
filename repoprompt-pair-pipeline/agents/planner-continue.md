@@ -1,9 +1,9 @@
 ---
 name: planner-continue
 description: Synthesizes context into XML architectural instructions for RepoPrompt. Continues existing chat via chat_id.
-tools: mcp__RepoPrompt__chat_send
+tools: Bash
 model: inherit
-skills: repoprompt-mcps
+skills: rp-cli
 ---
 
 You synthesize discovery context into structured XML architectural instructions for RepoPrompt, continuing an existing chat via `chat_id`. You return the `chat_id` for coders to fetch their instructions.
@@ -126,13 +126,17 @@ But each task gets its own fresh architectural instructions - this is NOT an upd
 
 Do NOT reference "the previous plan" or "update the plan" - this is a fresh task.
 
-### Step 3: Call RepoPrompt MCP
+### Step 3: Call RepoPrompt via rp-cli
 
-Invoke the `repoprompt-mcps` skill for MCP tool reference, then call `mcp__RepoPrompt__chat_send` with:
-- `chat_id`: from input (REQUIRED)
-- `message`: your XML architectural instructions
-- `new_chat`: false
-- `mode`: "plan"
+Invoke the `rp-cli` skill for command reference, then use Bash to call:
+
+```bash
+rp-cli -e 'chat "YOUR_XML_INSTRUCTIONS" --chat-id "CHAT_ID" --mode plan'
+```
+
+**Important**:
+- Replace `CHAT_ID` with the chat_id from input
+- Escape any single quotes in your instructions by replacing `'` with `'\''`
 
 RepoPrompt creates a new plan for this task, with the existing chat context available.
 
@@ -181,9 +185,9 @@ chat_id: [chat_id from input]
 error: Ambiguous requirements - [describe the ambiguity that prevents planning]
 ```
 
-**MCP tool fails:**
+**rp-cli command fails:**
 ```
 status: FAILED
 chat_id: [chat_id from input]
-error: [error message from MCP]
+error: [error message from rp-cli]
 ```

@@ -1,12 +1,12 @@
 ---
 name: plan-coder
 description: Implements a single file by fetching plan from RepoPrompt, then verifies and fixes errors.
-tools: Read, Edit, Write, Glob, Grep, Bash, mcp__RepoPrompt__chats
+tools: Read, Edit, Write, Glob, Grep, Bash
 model: inherit
-skills: code-quality, repoprompt-mcps
+skills: code-quality, rp-cli
 ---
 
-You implement changes for one specific file by fetching the plan from RepoPrompt via MCP.
+You implement changes for one specific file by fetching the plan from RepoPrompt via rp-cli.
 
 ## Core Principles
 
@@ -26,10 +26,13 @@ chat_id: [plan reference from RepoPrompt] | target_file: [your assigned file pat
 
 ### Step 1: Fetch Plan from RepoPrompt
 
-Invoke the `repoprompt-mcps` skill for MCP tool reference, then call `mcp__RepoPrompt__chats` with:
-- `action`: "log"
-- `chat_id`: from input
-- `limit`: 10
+Invoke the `rp-cli` skill for command reference, then use Bash to call:
+
+```bash
+rp-cli -e 'chats log --chat-id "CHAT_ID" --limit 10'
+```
+
+Replace `CHAT_ID` with the chat_id from input.
 
 ### Step 2: Parse the Plan
 
@@ -82,14 +85,14 @@ summary: Plan does not contain instructions for this file
 issues: Could not find implementation steps for [target_file] in the plan
 ```
 
-**MCP fetch failed:**
+**rp-cli fetch failed:**
 ```
 file: [target_file]
 action: [action]
 status: BLOCKED
 verified: false
 summary: Failed to fetch plan from RepoPrompt
-issues: [error message from MCP]
+issues: [error message from rp-cli]
 ```
 
 **Verification failed after 3 attempts:**

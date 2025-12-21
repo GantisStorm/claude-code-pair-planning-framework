@@ -11,8 +11,8 @@
     {
       "name": "repoprompt-pair-pipeline",
       "source": "./repoprompt-pair-pipeline",
-      "description": "Multi-agent orchestration for complex coding tasks with RepoPrompt. Scouts gather raw context, planners synthesize XML architectural instructions with structured sections: task, architecture, selected_context, relationships, implementation_notes, ambiguities. RepoPrompt creates detailed plans with minimal ambiguity. Parallel coders execute with self-verification.",
-      "version": "1.7.0"
+      "description": "Multi-agent orchestration for complex coding tasks with RepoPrompt. Scouts gather raw context, planners synthesize XML architectural instructions with structured sections: task, architecture, selected_context, relationships, implementation_notes, ambiguities. RepoPrompt creates detailed plans with minimal ambiguity. Parallel coders execute with self-verification. Uses rp-cli for RepoPrompt integration.",
+      "version": "1.8.0"
     },
     {
       "name": "pair-pipeline",
@@ -29,20 +29,20 @@
     {
       "name": "repoprompt-swarm",
       "source": "./repoprompt-swarm",
-      "description": "One-shot swarm commands with RepoPrompt planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for RepoPrompt, parallel coders execute. No iterative loops - fast parallel execution.",
-      "version": "1.7.0"
+      "description": "One-shot swarm commands with RepoPrompt planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for RepoPrompt, parallel coders execute. No iterative loops - fast parallel execution. Uses rp-cli for RepoPrompt integration.",
+      "version": "1.8.0"
     },
     {
       "name": "codex-pair-pipeline",
       "source": "./codex-pair-pipeline",
-      "description": "Multi-agent orchestration for complex coding tasks with Codex CLI (gpt-5.2-codex). Scouts gather raw context, planners synthesize XML architectural instructions. Returns full plan with per-file instructions. Iterative discovery with user checkpoints and parallel execution. Session continuation via codex resume.",
-      "version": "1.11.0"
+      "description": "Multi-agent orchestration for complex coding tasks with Codex CLI (gpt-5.2). Scouts gather raw context, planners synthesize XML architectural instructions. Returns full plan with per-file instructions. Iterative discovery with user checkpoints and parallel execution. Session continuation via codex resume.",
+      "version": "1.12.0"
     },
     {
       "name": "codex-swarm",
       "source": "./codex-swarm",
-      "description": "One-shot swarm commands with Codex CLI planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for Codex (gpt-5.2-codex), parallel coders execute. No iterative loops - fast parallel execution.",
-      "version": "1.10.0"
+      "description": "One-shot swarm commands with Codex CLI planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for Codex (gpt-5.2), parallel coders execute. No iterative loops - fast parallel execution.",
+      "version": "1.11.0"
     },
     {
       "name": "gemini-pair-pipeline",

@@ -200,11 +200,11 @@ The orchestrator spawns specialized agents via the `Task` tool with `run_in_back
 |-------|---------|-------|--------|
 | code-scout | Investigate codebase | Glob, Grep, Read, Bash | Raw CODE_CONTEXT + clarification |
 | doc-scout | Fetch external docs | Any research tools | Raw EXTERNAL_CONTEXT + clarification |
-| planner-start | Synthesize prompt, create plan via RepoPrompt | context_builder | chat_id + file lists |
-| planner-context | Evaluate and optimize workspace selection | manage_selection, workspace_context, file_search | selection_summary + ready_for_planning |
-| planner-continue | Synthesize prompt for new task in existing chat | chat_send | chat_id + file lists |
-| planner-fetch | Fetch existing plan (NO synthesis) | chats | chat_id + file lists |
-| plan-coder | Implement single file (RepoPrompt mode) | Read, Edit, Write, Glob, Grep, Bash, chats | status + verified |
+| planner-start | Synthesize prompt, create plan via RepoPrompt | Bash (rp-cli builder) | chat_id + file lists |
+| planner-context | Evaluate and optimize workspace selection | Bash (rp-cli select, context, etc.) | selection_summary + ready_for_planning |
+| planner-continue | Synthesize prompt for new task in existing chat | Bash (rp-cli chat) | chat_id + file lists |
+| planner-fetch | Fetch existing plan (NO synthesis) | Bash (rp-cli chats) | chat_id + file lists |
+| plan-coder | Implement single file (RepoPrompt mode) | Read, Edit, Write, Glob, Grep, Bash (rp-cli) | status + verified |
 
 ## Tips
 
@@ -222,6 +222,7 @@ The orchestrator spawns specialized agents via the `Task` tool with `run_in_back
 - BLOCKED status includes error details - read them
 - Re-run with `command:continue` after fixing blockers
 - Incomplete context? Add research at checkpoints
+- Check if RepoPrompt is running and rp-cli is installed (`rp-cli --version`)
 
 ## Comparison with Other Plugins
 
@@ -246,5 +247,6 @@ For a simpler pipeline without RepoPrompt dependency, see **pair-pipeline** whic
 
 ## Requirements
 
-- **RepoPrompt MCP** - Required for all planning modes
+- **RepoPrompt** - Required (with MCP Server enabled in settings)
+- **rp-cli** - Install via RepoPrompt Settings → MCP Server → "Install CLI to PATH"
 - **Claude Code** - Orchestration, discovery, and execution

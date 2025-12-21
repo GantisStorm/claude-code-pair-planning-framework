@@ -1,9 +1,9 @@
 ---
 name: planner-fetch
 description: Fetches existing plan from RepoPrompt by chat_id. Returns file lists for execution.
-tools: mcp__RepoPrompt__chats
+tools: Bash
 model: inherit
-skills: repoprompt-mcps
+skills: rp-cli
 ---
 
 You fetch an existing architectural plan from RepoPrompt and extract file lists for execution. You do NOT synthesize prompts or create plans - only retrieve plans that were already created.
@@ -25,10 +25,13 @@ chat_id: [existing plan reference from RepoPrompt]
 
 ### Step 1: Fetch Plan from RepoPrompt
 
-Invoke the `repoprompt-mcps` skill for MCP tool reference, then call `mcp__RepoPrompt__chats` with:
-- `action`: "log"
-- `chat_id`: from input
-- `limit`: 10
+Invoke the `rp-cli` skill for command reference, then use Bash to call:
+
+```bash
+rp-cli -e 'chats log --chat-id "CHAT_ID" --limit 10'
+```
+
+Replace `CHAT_ID` with the chat_id from input.
 
 ### Step 2: Parse the Plan
 
@@ -74,9 +77,9 @@ chat_id: [same as input]
 error: Chat not found - verify the chat_id is correct
 ```
 
-**MCP tool fails:**
+**rp-cli command fails:**
 ```
 status: FAILED
 chat_id: [same as input]
-error: [error message from MCP]
+error: [error message from rp-cli]
 ```

@@ -92,17 +92,17 @@ Takes a chat_id and spawns plan-coders as background tasks (parallel). Uses `Tas
 |-------|---------|-------|--------|
 | code-scout | Investigate codebase | Glob, Grep, Read, Bash | Raw CODE_CONTEXT |
 | doc-scout | Fetch external docs | Any research tools | Raw EXTERNAL_CONTEXT |
-| planner | Synthesize context, send to RepoPrompt | mcp__RepoPrompt__context_builder | chat_id + file lists |
-| plan-coder | Implement single file (fetches from RepoPrompt) | Read, Edit, Write, Glob, Grep, Bash, mcp__RepoPrompt__chats | Status + verified |
+| planner | Synthesize context, send to RepoPrompt | Bash (rp-cli) | chat_id + file lists |
+| plan-coder | Implement single file (fetches from RepoPrompt) | Read, Edit, Write, Glob, Grep, Bash (rp-cli) | Status + verified |
 
 ## Plan Distribution
 
 Plans are stored in RepoPrompt - the planner returns a `chat_id` that coders use to fetch their instructions. This enables:
 - Centralized plan storage in RepoPrompt
-- Each coder fetches its instructions independently via MCP
+- Each coder fetches its instructions independently via rp-cli
 - Plan remains accessible for re-execution
 
-The RepoPrompt MCP server is required for both planning (context_builder) and plan retrieval (chats).
+Agents use rp-cli commands via Bash for both planning (`builder`) and plan retrieval (`chats log`).
 
 ## Tips
 
@@ -118,7 +118,7 @@ The RepoPrompt MCP server is required for both planning (context_builder) and pl
 
 **When things go wrong:**
 - BLOCKED status includes error details - read them
-- Check if RepoPrompt MCP is running
+- Check if RepoPrompt is running and rp-cli is installed (`rp-cli --version`)
 - Try regenerating the plan with more specific task/research
 
 ## Comparison with Other Plugins
@@ -139,5 +139,6 @@ Use **repoprompt-pair-pipeline** when you need iterative discovery with user che
 
 ## Requirements
 
-- **RepoPrompt MCP** - Required for planning and plan retrieval
+- **RepoPrompt** - Required (with MCP Server enabled in settings)
+- **rp-cli** - Install via RepoPrompt Settings → MCP Server → "Install CLI to PATH"
 - **Claude Code** - Orchestration and execution

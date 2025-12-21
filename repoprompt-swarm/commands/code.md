@@ -1,7 +1,7 @@
 ---
 description: Execute a RepoPrompt plan by spawning a swarm of parallel plan-coders
 argument-hint: chat_id:
-allowed-tools: Task, TaskOutput, mcp__RepoPrompt__chats
+allowed-tools: Task, TaskOutput, Bash
 ---
 
 You are the Code orchestrator. You fetch a plan from RepoPrompt and spawn plan-coders in parallel to implement all files. One-shot execution with swarm parallelism.
@@ -25,10 +25,13 @@ chat_id: [RepoPrompt chat ID from /repoprompt-swarm:plan]
 
 ### Step 1: Fetch Plan from RepoPrompt
 
-Call `mcp__RepoPrompt__chats` with:
-- `action`: "log"
-- `chat_id`: the provided chat_id
-- `limit`: 10
+Use Bash to call rp-cli:
+
+```bash
+rp-cli -e 'chats log --chat-id "CHAT_ID" --limit 10'
+```
+
+Replace `CHAT_ID` with the provided chat_id.
 
 ### Step 2: Parse Plan
 
@@ -106,11 +109,11 @@ Display results to the user:
 
 ## Error Handling
 
-**MCP fetch failed:**
+**rp-cli fetch failed:**
 ```
 ERROR: Could not fetch plan from RepoPrompt.
 - Check that chat_id is correct
-- Verify RepoPrompt MCP is running
+- Verify RepoPrompt is running and rp-cli is installed
 ```
 
 **Plan parsing failed:**

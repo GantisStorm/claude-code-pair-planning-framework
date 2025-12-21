@@ -1,7 +1,7 @@
 {
   "name": "repoprompt-swarm",
   "description": "One-shot swarm commands with RepoPrompt planning. Scouts gather context in parallel, planner synthesizes XML architectural instructions for RepoPrompt, parallel coders execute. No iterative loops - fast parallel execution.",
-  "version": "1.7.0", 
+  "version": "1.8.0", 
   "author": {
     "name": "Repo Prompt Contributors"
   }

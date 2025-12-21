@@ -160,10 +160,10 @@ IMPORTANT: Format your output with clear sections:
 Do not make any changes. Respond with the implementation plan only." --sandbox read-only --ask-for-approval never 2>&1
 ```
 
-If no sessionId, fall back to `codex exec` with `-m gpt-5.2-codex`:
+If no sessionId, fall back to `codex exec` with `-m gpt-5.2`:
 
 ```bash
-codex exec "..." -m gpt-5.2-codex --reasoning-effort high --sandbox read-only --ask-for-approval never 2>&1
+codex exec "..." -m gpt-5.2 --reasoning-effort high --sandbox read-only --ask-for-approval never 2>&1
 ```
 
 **Why sessionId matters:** By resuming the session from the previous planning run, Codex can reference prior context and conversation history.
