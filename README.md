@@ -43,31 +43,6 @@ A **pluggable multi-agent planning framework** for Claude Code. Swap planning en
 
 ---
 
-## Why Pluggable Planning?
-
-Different planning engines excel at different tasks. Rather than building four separate systems, the Pair Planning Framework **standardizes everything except the planner** - giving you the flexibility to choose the right tool for each task.
-
-| Planning Engine | Strengths | Best For | Key Nuance |
-|-----------------|-----------|----------|------------|
-| **Claude** (pair-*) | Fast, no dependencies | Quick tasks, standalone | Narrative format, zero setup |
-| **RepoPrompt** (repoprompt-*) | Intelligent file selection | Complex refactors | Persistent plans via `chat_id` |
-| **Codex** (codex-*) | High reasoning (gpt-5.2) | Difficult architecture | Deep planning with reasoning effort |
-| **Gemini** (gemini-*) | Fast, stateless | Well-defined tasks | Fully one-shot, no session history |
-
-**What stays the same across all engines:**
-- Discovery agents: code-scout and doc-scout work identically
-- Execution agents: plan-coder implements files the same way
-- Commands: `/orchestrate` (pipeline) or `/plan` + `/code` (swarm)
-- Output format: `files_to_edit`, `files_to_create`, per-file instructions
-
-**What changes per engine:**
-- How context is synthesized into a plan (Narrative vs XML)
-- Where plans are stored (orchestrator memory vs MCP)
-- How plans reach coders (embedded in prompt vs MCP fetch)
-- External dependencies (none vs CLI vs MCP)
-
----
-
 ## Execution Patterns
 
 The framework offers **two execution patterns** that work with any planning engine.
