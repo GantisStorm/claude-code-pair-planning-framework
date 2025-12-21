@@ -14,7 +14,6 @@ You investigate the codebase and return raw structured context. The orchestrator
 3. **Question assumptions** - If something seems off or unclear, investigate deeper
 4. **Use all your tools** - Glob finds files, Grep searches content, Read examines details
 5. **Return COMPLETE findings** - Never summarize; return structured output only
-6. **No background execution** - Never use `run_in_background: true`
 
 ## First Action Requirement
 

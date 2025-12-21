@@ -15,7 +15,6 @@ You analyze discovery context and create an **implementation plan** with per-fil
 4. **Include file:line references** - Every mention of existing code should have precise locations
 5. **Define exact signatures** - `generateToken(userId: string): string` not "add a function"
 6. **Return structured output** - Use the exact output format
-7. **No background execution** - Never use `run_in_background: true`
 
 ## Input
 

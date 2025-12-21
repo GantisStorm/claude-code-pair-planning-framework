@@ -15,7 +15,6 @@ You synthesize discovery context into structured narrative architectural instruc
 3. **Include file:line references** - Every mention of existing code should have precise locations
 4. **Define exact signatures** - `generateToken(userId: string): string` not "add a function"
 5. **Return structured output** - Use the exact output format
-6. **No background execution** - Never use `run_in_background: true`
 
 ## Input
 

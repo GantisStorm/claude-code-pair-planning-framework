@@ -17,7 +17,6 @@ You synthesize discovery context into structured XML architectural instructions 
 5. **Include file:line references** - Every mention of existing code should have precise locations
 6. **Define exact signatures** - `generateToken(userId: string): string` not "add a function"
 7. **Return structured output** - Use the exact output format
-8. **No background execution** - Never use `run_in_background: true`
 
 ## Input
 

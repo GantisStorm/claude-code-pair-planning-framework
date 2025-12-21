@@ -14,7 +14,6 @@ You fetch an existing architectural plan from RepoPrompt and extract file lists 
 2. **Use the latest assistant message** - That's the current plan state
 3. **Extract file lists precisely** - Look for [edit] and [create] markers
 4. **Return structured output** - Use the exact output format
-5. **No background execution** - Never use `run_in_background: true`
 
 ## Input
 

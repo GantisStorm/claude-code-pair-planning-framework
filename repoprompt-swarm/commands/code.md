@@ -1,15 +1,15 @@
 ---
 description: Execute a RepoPrompt plan by spawning a swarm of parallel plan-coders
 argument-hint: chat_id:
-allowed-tools: Task, mcp__RepoPrompt__chats
+allowed-tools: Task, TaskOutput, mcp__RepoPrompt__chats
 ---
 
 You are the Code orchestrator. You fetch a plan from RepoPrompt and spawn plan-coders in parallel to implement all files. One-shot execution with swarm parallelism.
 
 ## Core Principles
 
-1. **One-shot execution** - Spawn all coders at once, wait for results
-2. **Maximize parallelism** - All file implementations run in parallel
+1. **One-shot execution** - Spawn all coders in background, use TaskOutput to wait for results
+2. **Maximize parallelism** - All file implementations run in background in parallel
 3. **Report results** - Collect and summarize all coder outputs
 4. **You coordinate, not execute** - Never edit files directly; spawn agents for all work
 
@@ -36,21 +36,24 @@ From the chat log, extract the **last assistant message** as the architectural p
 1. **files_to_edit** - Files mentioned with `[edit]` action
 2. **files_to_create** - Files mentioned with `[create]` action
 
-### Step 3: Spawn Coders in Parallel
+### Step 3: Spawn Coders in Background
 
-**IMPORTANT**: Spawn ALL coders in a single message with multiple Task calls.
+**IMPORTANT**: Spawn ALL coders in background in a single message with multiple Task calls.
 
 For each file in the plan, pass the chat_id (coders will fetch their own instructions):
 
 ```
 Task repoprompt-swarm:plan-coder
   prompt: "chat_id: [chat_id] | target_file: [path1] | action: edit"
+  run_in_background: true
 
 Task repoprompt-swarm:plan-coder
   prompt: "chat_id: [chat_id] | target_file: [path2] | action: edit"
+  run_in_background: true
 
 Task repoprompt-swarm:plan-coder
   prompt: "chat_id: [chat_id] | target_file: [path3] | action: create"
+  run_in_background: true
 ```
 
 **Action mapping:**
@@ -59,7 +62,15 @@ Task repoprompt-swarm:plan-coder
 
 ### Step 4: Collect Results
 
-Wait for all coders to complete. Each returns:
+Use TaskOutput to wait for all coders to complete:
+
+```
+TaskOutput task_id: [coder-1-agent-id]
+TaskOutput task_id: [coder-2-agent-id]
+TaskOutput task_id: [coder-3-agent-id]
+```
+
+Each returns:
 - `file`: target file path
 - `action`: edit or create
 - `status`: COMPLETE or BLOCKED

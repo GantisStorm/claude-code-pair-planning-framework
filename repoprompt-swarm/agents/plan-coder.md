@@ -15,7 +15,6 @@ You implement changes for one specific file by fetching the plan from RepoPrompt
 3. **Verify before reporting** - Run code-quality and fix errors; never report COMPLETE with failing checks
 4. **Stay in your lane** - Only modify your assigned target_file, even if you see related issues
 5. **Return structured output** - Use the exact output format
-6. **No background execution** - Never use `run_in_background: true`
 
 ## Input
 
